@@ -1,0 +1,132 @@
+<section>
+    <!-- Modal -->
+    <form action="/admin/products" method="post" enctype="multipart/form-data">
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter the product name" name="Name"
+                            required>
+                        <select id="categ" class="mb-2 py-2" name="Category"
+                            style="display: block; padding-right: 138px" required>
+                            <option value="categ">Select category</option>
+                            {{#each categoryData}}
+                                <option value="{{this.category}}">{{this.category}}</option>
+                            {{/each}}
+                        </select>
+                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter original price" name="originalPrice"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter selling price" name="Price"
+                            required>
+                        <select id="ram" class="mb-2 py-2" name="RAM" style="display: block; padding-right: 165px"
+                            required>
+                            <option value="ram">Select RAM</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="12">12</option>
+                            <option value="16">16</option>
+                        </select>
+                        <select id="rom" class="mb-2 py-2" name="ROM" style="display: block; padding-right: 166px"
+                            required>
+                            <option value="rom">Select ROM</option>
+                            <option value="32">32</option>
+                            <option value="64">64</option>
+                            <option value="128">128</option>
+                            <option value="256">256</option>
+                            <option value="512">512</option>
+                        </select>
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter the display size" name="displaysize"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter the display type" name="displaytype"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter rear camera details" name="rear"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter front camera details" name="front"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="number" placeholder="Enter battery capactity" name="battery"
+                            required>
+                        <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter the processor name" name="processor"
+                            required>
+                        <br><label>Choose product images</label>
+                        <input type="file" accept="image/png, image/jpeg" name="image" id="image">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped table-dark">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Image</th>
+                <th scope="col">Category</th>
+                <th scope="col">Price</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each data}}
+            <tr>
+                <th scope="row">{{inc @index}}</th>
+                <td>{{this.Name}}</td>
+                <td><img src="{{this.imageurl}}" width="40"></td>
+                <td>{{this.Category}}</td>
+                <td>₹{{this.Price}}</td>
+                <td><a href="/admin/productEdit/{{this._id}}">
+                        <button type="button" class="btn btn-warning">
+                            Edit
+                        </button>
+                    </a>
+                </td>
+                <td>
+                    {{#if this.productDisable}}
+                        <a href="/admin/productEnable/{{this._id}}">
+                            <button class="btn btn-primary bg-success"
+                                onclick="return confirm('Are you sure, do you want to enable?')" type="submit"
+                                name="Enable">
+                                Enable
+                            </button>
+                        </a>
+                    {{else}}
+                        <a href="/admin/productDisable/{{this._id}}">
+                            <button class="btn btn-primary bg-danger"
+                                onclick="return confirm('Are you sure, do you want to disable?')" type="submit"
+                                name="Disable">
+                                Disable
+                            </button>
+                        </a>
+                    {{/if}}
+                </td>
+            </tr>
+            {{/each}}
+            <tr>
+                <td></td>
+                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        Add Product
+                    </button>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</section>

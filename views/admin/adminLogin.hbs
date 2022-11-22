@@ -1,0 +1,33 @@
+<nav class="navbar navbar-light mb-5" style="height: 3.5rem; background-color: #0a2558;">
+  <a class="navbar-brand" href="#">
+    <h3 class="text-white">PHONE MART</h3>
+  </a>
+</nav>
+
+<div class="container-fluid row justify-content-center">
+    <div class="col-md-4 col-lg-4 border border-primary mt-5" style="border-radius: 0.5rem">
+        <div class="d-flex justify-content-center">
+            <h2 class="py-3">Admin login</h2>
+        </div>
+        <form action="/admin/adminlogin" method="post">
+            <!-- Email input -->
+            <div class="form-outline mb-3">
+                <input type="email" id="form2Example1" name="Email" class="form-control" placeholder="Enter the email address" required />
+                {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example1">Email address</label> --}}
+            </div>
+
+            <!-- Password input -->
+            <div class="form-outline mb-3">
+                <input type="password" id="form2Example2" name="Password" class="form-control" placeholder="Enter password" required />
+                {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example2">Password</label> --}}
+            </div>
+
+            <div class="ml-5 pl-2 text-danger">
+                <p>{{message}}</p>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-4">Log in</button>
+        </form>
+    </div>
+</div>

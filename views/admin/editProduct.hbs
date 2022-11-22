@@ -1,0 +1,101 @@
+<div class="row justify-content-center">
+    <div class="p-3 mt-4 col-sm-6 col-md-6 col-lg-5 border border-primary" style="border-radius: 0.5rem;">
+        <div class="d-flex justify-content-center">
+            <h2 class="pb-2">Edit Product</h2>
+        </div>
+        <form action="/admin/productEdit/{{datas._id}}" method="post">
+
+            <!-- Name field -->
+            <div class="form-outline mb-2">
+                <label for="Name">Name</label>
+                <input type="text" id="form2Example2" name="Name" class="form-control" placeholder="Edit name" value="{{datas.Name}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="Category">Category</label>
+                <select id="categ" class="mb-2 py-2 form-control" name="Category"
+                            style="display: block;" required>
+                    <option value="{{datas.Category}}">{{datas.Category}}</option>
+                    {{#each categoryData}}
+                        <option value="{{this.category}}">{{this.category}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="originalPrice">Original price</label>
+                <input type="number" id="form2Example2" name="originalPrice" class="form-control" placeholder="Edit original price" value="{{datas.originalPrice}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="Price">Selling Price</label>
+                <input type="number" id="form2Example2" name="Price" class="form-control" placeholder="Edit price" value="{{datas.Price}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="RAM">RAM</label>
+                <select id="ram" class="mb-2 py-2 form-control" name="RAM" style="display: block;"
+                            required>
+                    <option value="{{datas.RAM}}">{{datas.RAM}}</option>
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="8">8</option>
+                    <option value="12">12</option>
+                    <option value="16">16</option>
+                </select>
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="ROM">ROM</label>
+                <select id="rom" class="mb-2 py-2 form-control" name="ROM" style="display: block;"
+                            required>
+                    <option value="{{datas.ROM}}">{{datas.ROM}}</option>
+                    <option value="32">32</option>
+                    <option value="64">64</option>
+                    <option value="128">128</option>
+                    <option value="256">256</option>
+                    <option value="512">512</option>
+                </select>
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="displaysize">Display size</label>
+                <input type="text" id="form2Example2" name="Display_size" class="form-control" placeholder="Edit display size" value="{{datas.Display_size}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="displaytype">Display type</label>
+                <input type="text" id="form2Example2" name="Display_type" class="form-control" placeholder="Edit display type" value="{{datas.Display_type}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="rear">Rear camera details</label>
+                <input type="text" id="form2Example2" name="Rear_camera" class="form-control" placeholder="Edit rear camera details" value="{{datas.Rear_camera}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="front">Front camera details</label>
+                <input type="text" id="form2Example2" name="Front_camera" class="form-control" placeholder="Edit front camera details" value="{{datas.Front_camera}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="battery">Battery capacity</label>
+                <input type="number" id="form2Example2" name="Battery" class="form-control" placeholder="Edit battery capacity" value="{{datas.Battery}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="processor">Processor name</label>
+                <input type="text" id="form2Example2" name="Processor" class="form-control" placeholder="Edit processor name" value="{{datas.Processor}}" required />
+            </div>
+
+            <div class="form-outline mb-2">
+                <label for="Image">Change image</label>
+                <input type="file" name="Image" id="image" class="form-control">
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-1 mt-3">Save changes</button>
+        </form>
+    </div>
+</div>

@@ -73,7 +73,6 @@ module.exports = {
     disableProduct: async (req,res) => {
         try {
             const { id } = req.params;
-            console.log(id);
             await products.findByIdAndUpdate(id,{$set:{productDisable:true}});
             res.redirect('/admin/products');
         } catch (error) {
@@ -84,7 +83,6 @@ module.exports = {
     enableProduct: async (req,res) => {
         try {
             const { id } = req.params;
-            console.log(id);
             await products.findByIdAndUpdate(id,{$set:{productDisable:false}});
             res.redirect('/admin/products');
         } catch (error) {

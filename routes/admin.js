@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/auth');
+const auth = require('../middlewares/adminAuth');
 const adminController = require('../controllers/adminController');
 const customerController = require('../controllers/customerController');
 const categoryController = require('../controllers/categoryController');
 const productController = require('../controllers/productController');
 const upload = require('../middlewares/multer');
-
 
 router.get('/',adminController.loginGet);
 router.post('/adminLogin',adminController.loginPost);

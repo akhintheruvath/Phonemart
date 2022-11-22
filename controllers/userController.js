@@ -5,28 +5,43 @@ const categories = require('../models/categoryModel');
 const carts = require('../models/cartModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 
 let msg = '';
 let msg2 = '';
 let customerId;
+let otpmsg = '';
+let userName, Email, Password;
+
+let mailTransporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "akhintheruvath2827@gmail.com",
+        pass: "mutcxknugedxvkxk",
+    },
+});
+
+const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
 
 module.exports = {
     homeGet: async (req, res) => {
         if (req.session.customer) {
-            let productDetails = await products.find({$and:[{categoryDisable:false},{productDisable:false}]}).lean();
-            console.log('Hello'+productDetails);
+            let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
             res.render('user/userHome', { signedin: true, products: productDetails, productDetails });
         } else {
-            let productDetails = await products.find({$and:[{categoryDisable:false},{productDisable:false}]}).lean();
-            console.log('Hello',productDetails);
+            let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
             let categoryDetails = await categories.find({}).lean();
-            res.render('user/userHome', { signedin: false, products: productDetails, categories:categoryDetails, productDetails });
+            res.render('user/userHome', { signedin: false, products: productDetails, categories: categoryDetails, productDetails });
         }
     },
 
     loginGet: (req, res) => {
-        res.render('user/userLogin', { message: msg });
-        msg = '';
+        if(req.session.customer){
+            res.redirect('/');
+        }else{
+            res.render('user/userLogin', { message: msg });
+            msg = '';
+        }
     },
 
     loginPost: async (req, res) => {
@@ -41,7 +56,6 @@ module.exports = {
                     httpOnly: true
                 });
                 customerId = customer._id;
-                console.log(customerId);
 
                 res.redirect('/');
             } else {
@@ -62,25 +76,27 @@ module.exports = {
 
     signupPost: async (req, res) => {
 
+        ({ userName, Email, Password } = req.body);
+        let mailDetails = {
+            from: "akhintheruvath2827@gmail.com",
+            to: Email,
+            subject: "PHONEMART REGISTRATION",
+            html: `<p>YOUR OTP FOR REGISTERING IN PHONEMART IS ${OTP}</p>`,
+        };
+
+        mailTransporter.sendMail(mailDetails, function (err, data) {
+            if (err) {
+                console.log("Error Occurs");
+            } else {
+                console.log("Email sent successfully");
+            }
+        });
+
         try {
-            if (req.body.Password.length >= 8) {
-                req.body.Password = await bcrypt.hash(req.body.Password, 10);
-
-                const user = new Users({
-                    Name: req.body.userName,
-                    Email: req.body.Email,
-                    Password: req.body.Password
-                });
-                await user.save();
-
-                const Email = req.body.Email;
-                req.session.customer = Email;
-                res.cookie('userId', Email, {
-                    maxAge: 2 * 60 * 60 * 1000,
-                    httpOnly: true
-                });
-
-                res.redirect("/");
+            const userMail = await Users.findOne({Email:Email});
+            if (req.body.Password.length >= 8 && (!userMail)) {
+                Password = await bcrypt.hash(req.body.Password, 10);
+                res.redirect('/otpPage');
             } else {
                 msg2 = 'Password must be at least 8 characters';
                 res.redirect('/signup');
@@ -92,8 +108,36 @@ module.exports = {
         }
     },
 
+    otpPageGet: (req, res) => {
+        res.render('user/otpPage', { message: otpmsg })
+        otpmsg = '';
+    },
+
+    otpPost: async (req, res) => {
+        const { otp } = req.body;
+        if (otp === OTP) {
+            const user = new Users({
+                Name: userName,
+                Email: Email,
+                Password: Password,
+            });
+            await user.save();
+
+            req.session.customer = Email;
+            res.cookie('userId', Email, {
+                maxAge: 2 * 60 * 60 * 1000,
+                httpOnly: true
+            });
+
+            res.redirect("/");
+        } else {
+            otpmsg = 'Invalid OTP.. Try again';
+            res.redirect('/otpPage');
+        }
+    },
+
     shopGet: async (req, res) => {
-        let productDetails = await products.find({$and:[{categoryDisable:false},{productDisable:false}]}).lean();
+        let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
         res.render('user/shop', { products: productDetails });
     },
 
@@ -103,11 +147,12 @@ module.exports = {
         res.render('user/singleProduct', { productData });
     },
 
+
+
     cartPage: async (req, res) => {
         if (req.session.customer) {
             console.log(customerId);
-            
-            
+
 
             res.render('user/cart'/*, { products: datas }*/);
         } else {
@@ -117,16 +162,27 @@ module.exports = {
 
     addToCart: (req, res) => {
         if (req.session.customer) {
-            
-            
+
 
         } else {
             res.redirect('/login');
         }
     },
 
-    wishlistPage: (req,res) => {
-        res.render('user/wishlist');
+    wishlistPage: (req, res) => {
+        if(req.session.customer){
+            res.render('user/wishlist');
+        }else{
+            res.redirect('/login');
+        }
+    },
+
+    addToWishlist: (req,res) => {
+        if(req.session.customer){
+            
+        }else{
+            res.redirect('/login');
+        }
     },
 
     checkoutPage: (req, res) => {

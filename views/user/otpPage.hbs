@@ -27,7 +27,7 @@
 
     <!-- Topbar Start -->
     <div class="container-fluid">
-
+        
         <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
             <div class="col-lg-4">
                 <a href="/" class="text-decoration-none">
@@ -45,47 +45,25 @@
     </div>
     <!-- Topbar End -->
 
+
     <div class="container-fluid row justify-content-center">
         <div class="col-md-4 col-lg-4 border border-primary mt-5" style="border-radius: 0.5rem">
             <div class="d-flex justify-content-center">
-                <h2 class="py-3">Sign up</h2>
+                <h2 class="py-3">Enter the OTP</h2>
             </div>
-            <form action="/signup" method="post" id="userSignupForm">
-
-                <!-- Name field -->
-                <div class="form-outline mb-3">
-                    <input type="text" id="form2Example2" name="userName" class="form-control"
-                        placeholder="Enter your name" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example2">Name</label>
-                    --}}
-                </div>
-
-                <!-- Email input -->
-                <div class="form-outline mb-3">
-                    <input type="email" id="form2Example1" class="form-control" name="Email"
-                        placeholder="Enter your email" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example1">Email
-                        address</label> --}}
-                </div>
-
-                <!-- Password input -->
-                <div class="form-outline mb-3">
-                    <input type="password" id="form2Example2" class="form-control mb-3" name="Password"
-                        placeholder="Enter password" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2"
-                        for="form2Example2">Password</label> --}}
+            <form action="/otpPage" method="post">
+                <!-- OTP input -->
+                <div class="mb-3">
+                    <input type="number" id="form2Example1" class="form-control" name="otp"
+                        placeholder="Enter OTP here" required />
                 </div>
 
                 <div>
-                    <p class="ml-4 pl-5 text-danger">{{message}}</p>
-                </div>
-
-                <div class="text-center">
-                    <p>Already have an account? <a href="/login">Log in</a></p>
+                    <p class="pl-1 text-danger">{{message}}</p>
                 </div>
 
                 <!-- Submit button -->
-                <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+                <button type="submit" class="btn btn-primary btn-block mb-3">Verify OTP</button>
             </form>
         </div>
     </div>

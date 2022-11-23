@@ -3,6 +3,7 @@ const Users = require('../models/userModel');
 const products = require('../models/productModel');
 const categories = require('../models/categoryModel');
 const carts = require('../models/cartModel');
+const wishlists = require('../models/wishlistModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
@@ -169,17 +170,49 @@ module.exports = {
         }
     },
 
-    wishlistPage: (req, res) => {
-        if(req.session.customer){
-            res.render('user/wishlist');
+    wishlistPage: async (req, res) => {
+        if(req.session.customer) {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({Email:userEmail});
+            const userId = user._id;
+            const userWishList = await wishlists.findOne({userId:userId}).populate('productId').lean();
+            const productArray = userWishList.productId;
+            res.render('user/wishlist',{wishlistProducts:productArray});
         }else{
             res.redirect('/login');
         }
     },
 
-    addToWishlist: (req,res) => {
-        if(req.session.customer){
-            
+    addToWishlist: async (req,res) => {
+        if (req.session.customer) {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({Email:userEmail});
+            let userId = user._id;
+            const userWishList = await wishlists.findOne({userId:userId});
+            const { productId } = req.body;
+            const product_id = mongoose.Types.ObjectId(productId);
+            if(userWishList){
+                const products = userWishList.productId;
+                const existStatus = await products.includes(product_id,0);
+                user_id = mongoose.Types.ObjectId(userId).toString();
+                if(!existStatus){
+                    await wishlists.updateOne({userId:user_id},{$push:{productId:product_id}});
+                } else {
+                    await wishlists.updateOne({userId:user_id},{$pull:{productId:product_id}}).then((response) => {
+                        res.json(response);
+                    })
+                }
+            } else {
+                try {
+                    const wishlist = new wishlists({
+                        userId: userId,
+                        productId: product_id
+                    })
+                    await wishlist.save();
+                } catch (error) {
+                    console.log(error.message);
+                }
+            }
         }else{
             res.redirect('/login');
         }
@@ -189,7 +222,7 @@ module.exports = {
         res.render('user/checkout');
     },
 
-    userLogout: (req, res) => {
+    userLogout: (req, res) => { 
         try {
             res.clearCookie('userId');
             res.clearCookie('session-1');

@@ -13,12 +13,10 @@ router.post('/otpPage',userController.otpPost);
 router.get('/shop',userController.shopGet);
 router.get('/singleProduct/:id',userController.singleProduct);
 
-router.use(auth);
-
 router.get('/cart',userController.cartPage);
 router.get('/addToCart/:id',userController.addToCart);
 router.get('/wishlist',userController.wishlistPage);
-router.get('/addToWishlist',userController.addToWishlist);
+router.post('/addToWishlist',userController.addToWishlist);
 router.get('/checkout',userController.checkoutPage);
 
 router.get('/logout',userController.userLogout);

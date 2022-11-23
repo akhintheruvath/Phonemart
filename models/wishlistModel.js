@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const wishlistSchema = new mongoose.Schema({
-    userId: ObjectId,
+    userId: String,
     productId: [{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'product'
+        type: String,
+        ref: 'products'
     }]
 })
 

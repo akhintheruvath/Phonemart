@@ -269,10 +269,8 @@
                                 <div class="product-img position-relative overflow-hidden">
                                     <img class="img-fluid" src="{{this.imageurl}}" width="120px" alt="product_image" style="margin-left: 105px; margin-top:20px">
                                     <div class="product-action">
-                                        <a class="btn btn-outline-dark btn-square" href=""><i
-                                                class="fa fa-shopping-cart"></i></a>
-                                        <a class="btn btn-outline-dark btn-square" href=""><i class="far fa-heart"></i></a>
-                                        
+                                        <a class="btn btn-outline-dark btn-square" href=""><i class="fa fa-shopping-cart"></i></a>
+                                        <a class="btn btn-outline-dark btn-square" id="heart_symbol"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
                                         <a class="btn btn-outline-dark btn-square" href="/singleProduct/{{this._id}}"><i class="fa fa-search"></i></a>
                                     </div>
                                 </div>
@@ -407,6 +405,26 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <script>
+        function addToWishlist(productId){
+            console.log('Hey there');
+            console.log(productId);
+            fetch('/addToWishlist',{
+                method:'post',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of wishlist fetch');
+                window.location.reload();
+                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+    </script>
 </body>
 
 </html>

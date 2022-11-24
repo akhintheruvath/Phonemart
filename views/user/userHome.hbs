@@ -28,7 +28,7 @@
 
 <body>
     <!-- Topbar Start -->
-    <div class="container-fluid">
+    <div class="container-fluid position-fixed-top">
         <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
@@ -88,9 +88,8 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="/" class="nav-item nav-link active">Home</a>
                             <a href="/shop" class="nav-item nav-link">Products</a>
-                            {{!-- <a href="detail.html" class="nav-item nav-link">New Arrivals</a>
-                            <a href=""></a>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a> --}}
+                            <a href="/cart" class="nav-item nav-link">Cart</a>
+                            <a href="/wishlist" class="nav-item nav-link">Wishlist</a>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-sm ml-2 pt-2 btn-dark">
                                     {{#if signedin}}
@@ -293,8 +292,8 @@
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid" src="{{this.imageurl}}" width="120px" alt="image" style="margin-left: 105px; margin-top:20px">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href=""><i class="fa fa-shopping-cart"></i></a>
-                                <a class="btn btn-outline-dark btn-square" id="heart_symbol"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
+                                <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToCart('{{this._id}}')"><i class="fa fa-shopping-cart"></i></button></a>
+                                <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
                                 <a class="btn btn-outline-dark btn-square" href="/singleProduct/{{this._id}}"><i class="fa fa-search"></i></a>
                             </div>
                         </div>
@@ -360,8 +359,8 @@
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid" src="{{this.imageurl}}" width="120px" alt="image" style="margin-left: 105px; margin-top:20px">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href=""><i class="fa fa-shopping-cart"></i></a>
-                                <a class="btn btn-outline-dark btn-square" id="heart_symbol"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
+                                <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToCart('{{this._id}}')"><i class="fa fa-shopping-cart"></i></button></a>
+                                <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
                                 <a class="btn btn-outline-dark btn-square" href="/singleProduct/{{this._id}}"><i class="fa fa-search"></i></a>
                             </div>
                         </div>
@@ -508,7 +507,23 @@
                 body:JSON.stringify({ productId })
             }).then(() => {
                 console.log('Reached in then of wishlist fetch');
-                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+
+        function addToCart(productId){
+            console.log('Inside addToCart function');
+            console.log(productId);
+            fetch('/addToCart',{
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of cart fetch');
+                location.href = '/cart';
             }).catch((error) => {
                 console.log('Error: ',error.message);
             })

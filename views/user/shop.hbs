@@ -88,17 +88,8 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="/" class="nav-item nav-link">Home</a>
                             <a href="/shop" class="nav-item nav-link active">Products</a>
-                            {{!-- <a href="detail.html" class="nav-item nav-link">New Arrivals</a>
-                            <a href=""></a> --}}
-                            {{!-- <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages <i
-                                        class="fa fa-angle-down mt-1"></i></a>
-                                <div class="dropdown-menu bg-primary rounded-0 border-0 m-0">
-                                    <a href="cart.html" class="dropdown-item">Shopping Cart</a>
-                                    <a href="checkout.html" class="dropdown-item">Checkout</a>
-                                </div>
-                            </div> --}}
-                            {{!-- <a href="contact.html" class="nav-item nav-link">Contact</a> --}}
+                            <a href="/cart" class="nav-item nav-link">Cart</a>
+                            <a href="/wishlist" class="nav-item nav-link">Wishlist</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                             <a href="/wishlist" class="btn px-0">
@@ -269,8 +260,8 @@
                                 <div class="product-img position-relative overflow-hidden">
                                     <img class="img-fluid" src="{{this.imageurl}}" width="120px" alt="product_image" style="margin-left: 105px; margin-top:20px">
                                     <div class="product-action">
-                                        <a class="btn btn-outline-dark btn-square" href=""><i class="fa fa-shopping-cart"></i></a>
-                                        <a class="btn btn-outline-dark btn-square" id="heart_symbol"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
+                                        <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToCart('{{this._id}}')"><i class="fa fa-shopping-cart"></i></button></a>
+                                        <a class="btn btn-outline-dark btn-square"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{this._id}}')"><i class="far fa-heart"></i></button></a>
                                         <a class="btn btn-outline-dark btn-square" href="/singleProduct/{{this._id}}"><i class="fa fa-search"></i></a>
                                     </div>
                                 </div>
@@ -420,6 +411,23 @@
                 console.log('Reached in then of wishlist fetch');
                 window.location.reload();
                 {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+
+        function addToCart(productId){
+            console.log('Inside addToCart function');
+            console.log(productId);
+            fetch('/addToCart',{
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of cart fetch');
+                location.href = '/cart';
             }).catch((error) => {
                 console.log('Error: ',error.message);
             })

@@ -7,12 +7,14 @@ const wishlists = require('../models/wishlistModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const { resolve } = require('path');
 
 let msg = '';
 let msg2 = '';
 let customerId;
 let otpmsg = '';
 let userName, Email, Password;
+let arr = [];
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -66,7 +68,7 @@ module.exports = {
         } catch (error) {
             // res.send(error.message);
             msg = 'Invalid username or password';
-            res.redirect('/');
+            res.redirect('/login');
         }
     },
 
@@ -148,25 +150,47 @@ module.exports = {
         res.render('user/singleProduct', { productData });
     },
 
-
-
     cartPage: async (req, res) => {
         if (req.session.customer) {
-            console.log(customerId);
-
-
-            res.render('user/cart'/*, { products: datas }*/);
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({Email:userEmail});
+            const userId = user._id;
+            const userCart = await carts.findOne({userId:userId}).populate('cartItems.productId').lean();
+            console.log(userCart);
+            const productDetails = userCart.cartItems;
+            res.render('user/cart',{cartProducts:productDetails});
         } else {
             res.redirect('/login');
         }
     },
 
-    addToCart: (req, res) => {
-        if (req.session.customer) {
-
-
-        } else {
-            res.redirect('/login');
+    addToCart: async (req, res) => {
+        try {
+            if (req.session.customer) {
+                const userEmail = req.session.customer;
+                const user = await Users.findOne({Email:userEmail});
+                let userId = user._id;
+                const userCart = await carts.findOne({userId:userId});
+                const { productId } = req.body;
+                if(userCart){
+                    const productExist = await carts.findOne({"cartItems.productId":productId});
+                    if(productExist==null){
+                        await carts.updateOne({userId:userId},{$push:{cartItems:{productId:productId}}});
+                    } else {
+                        res.json();
+                    }
+                }else{
+                    const cart = new carts({
+                        userId: userId,
+                        cartItems: { productId:productId }
+                    })
+                    cart.save();
+                }
+            } else {
+                res.redirect('/login');
+            }
+        } catch (error) {
+            console.log(error.message);
         }
     },
 

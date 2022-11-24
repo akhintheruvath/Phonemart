@@ -14,7 +14,7 @@ router.get('/shop',userController.shopGet);
 router.get('/singleProduct/:id',userController.singleProduct);
 
 router.get('/cart',userController.cartPage);
-router.get('/addToCart/:id',userController.addToCart);
+router.post('/addToCart',userController.addToCart);
 router.get('/wishlist',userController.wishlistPage);
 router.post('/addToWishlist',userController.addToWishlist);
 router.get('/checkout',userController.checkoutPage);

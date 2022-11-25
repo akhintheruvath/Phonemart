@@ -7,14 +7,13 @@ const wishlists = require('../models/wishlistModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-const { resolve } = require('path');
+// const { resolve } = require('path');
 
 let msg = '';
 let msg2 = '';
 let customerId;
 let otpmsg = '';
 let userName, Email, Password;
-let arr = [];
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -39,9 +38,9 @@ module.exports = {
     },
 
     loginGet: (req, res) => {
-        if(req.session.customer){
+        if (req.session.customer) {
             res.redirect('/');
-        }else{
+        } else {
             res.render('user/userLogin', { message: msg });
             msg = '';
         }
@@ -96,7 +95,7 @@ module.exports = {
         });
 
         try {
-            const userMail = await Users.findOne({Email:Email});
+            const userMail = await Users.findOne({ Email: Email });
             if (req.body.Password.length >= 8 && (!userMail)) {
                 Password = await bcrypt.hash(req.body.Password, 10);
                 res.redirect('/otpPage');
@@ -153,12 +152,11 @@ module.exports = {
     cartPage: async (req, res) => {
         if (req.session.customer) {
             const userEmail = req.session.customer;
-            const user = await Users.findOne({Email:userEmail});
+            const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
-            const userCart = await carts.findOne({userId:userId}).populate('cartItems.productId').lean();
-            console.log(userCart);
+            const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
             const productDetails = userCart.cartItems;
-            res.render('user/cart',{cartProducts:productDetails});
+            res.render('user/cart', { cartProducts: productDetails });
         } else {
             res.redirect('/login');
         }
@@ -168,21 +166,21 @@ module.exports = {
         try {
             if (req.session.customer) {
                 const userEmail = req.session.customer;
-                const user = await Users.findOne({Email:userEmail});
+                const user = await Users.findOne({ Email: userEmail });
                 let userId = user._id;
-                const userCart = await carts.findOne({userId:userId});
+                const userCart = await carts.findOne({ userId: userId });
                 const { productId } = req.body;
-                if(userCart){
-                    const productExist = await carts.findOne({"cartItems.productId":productId});
-                    if(productExist==null){
-                        await carts.updateOne({userId:userId},{$push:{cartItems:{productId:productId}}});
+                if (userCart) {
+                    const productExist = await carts.findOne({ "cartItems.productId": productId });
+                    if (productExist == null) {
+                        await carts.updateOne({ userId: userId }, { $push: { cartItems: { productId: productId } } });
                     } else {
                         res.json();
                     }
-                }else{
+                } else {
                     const cart = new carts({
                         userId: userId,
-                        cartItems: { productId:productId }
+                        cartItems: { productId: productId }
                     })
                     cart.save();
                 }
@@ -194,35 +192,49 @@ module.exports = {
         }
     },
 
-    wishlistPage: async (req, res) => {
-        if(req.session.customer) {
+    removeFromCart: async (req, res) => {
+        try {
             const userEmail = req.session.customer;
-            const user = await Users.findOne({Email:userEmail});
+            const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
-            const userWishList = await wishlists.findOne({userId:userId}).populate('productId').lean();
+            const { productId } = req.body;
+            await carts.updateOne({ userId: userId }, { $pull: { cartItems: { productId: productId } } }).then((response) => {
+                res.json(response);
+            });
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    wishlistPage: async (req, res) => {
+        if (req.session.customer) {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({ Email: userEmail });
+            const userId = user._id;
+            const userWishList = await wishlists.findOne({ userId: userId }).populate('productId').lean();
             const productArray = userWishList.productId;
-            res.render('user/wishlist',{wishlistProducts:productArray});
-        }else{
+            res.render('user/wishlist', { wishlistProducts: productArray });
+        } else {
             res.redirect('/login');
         }
     },
 
-    addToWishlist: async (req,res) => {
+    addToWishlist: async (req, res) => {
         if (req.session.customer) {
             const userEmail = req.session.customer;
-            const user = await Users.findOne({Email:userEmail});
+            const user = await Users.findOne({ Email: userEmail });
             let userId = user._id;
-            const userWishList = await wishlists.findOne({userId:userId});
+            const userWishList = await wishlists.findOne({ userId: userId });
             const { productId } = req.body;
             const product_id = mongoose.Types.ObjectId(productId);
-            if(userWishList){
+            if (userWishList) {
                 const products = userWishList.productId;
-                const existStatus = await products.includes(product_id,0);
-                user_id = mongoose.Types.ObjectId(userId).toString();
-                if(!existStatus){
-                    await wishlists.updateOne({userId:user_id},{$push:{productId:product_id}});
+                const existStatus = await products.includes(product_id, 0);
+                const user_id = mongoose.Types.ObjectId(userId).toString();
+                if (!existStatus) {
+                    await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
                 } else {
-                    await wishlists.updateOne({userId:user_id},{$pull:{productId:product_id}}).then((response) => {
+                    await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
                         res.json(response);
                     })
                 }
@@ -237,7 +249,7 @@ module.exports = {
                     console.log(error.message);
                 }
             }
-        }else{
+        } else {
             res.redirect('/login');
         }
     },
@@ -246,7 +258,7 @@ module.exports = {
         res.render('user/checkout');
     },
 
-    userLogout: (req, res) => { 
+    userLogout: (req, res) => {
         try {
             res.clearCookie('userId');
             res.clearCookie('session-1');

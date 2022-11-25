@@ -135,7 +135,7 @@
                     </p>
 
                     <div class="d-flex align-items-center mb-4 pt-2">
-                        <a href="/addToCart/{{productData._id}}"><button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To
+                        <a><button class="btn btn-primary px-3" onclick="addToCart('{{productData._id}}')"><i class="fa fa-shopping-cart mr-1"></i> Add To
                             Cart</button></a>
                     </div>
                 </div>
@@ -143,11 +143,6 @@
         </div>
     </div>
     <!-- Shop Detail End -->
-
-
-    <!-- Products Start -->
-    
-    <!-- Products End -->
 
 
     <!-- Footer Start -->
@@ -239,6 +234,44 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Cart and Wishlist -->
+    <script>
+        function addToWishlist(productId){
+            console.log('Hey there');
+            console.log(productId);
+            fetch('/addToWishlist',{
+                method:'post',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of wishlist fetch');
+                window.location.reload();
+                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+
+        function addToCart(productId){
+            console.log('Inside addToCart function');
+            console.log(productId);
+            fetch('/addToCart',{
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of cart fetch');
+                location.href = '/cart';
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+    </script>
 </body>
 
 </html>

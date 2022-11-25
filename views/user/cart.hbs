@@ -148,7 +148,7 @@
                                     </div>
                                 </td>
                                 <td class="align-middle">$150</td>
-                            <td class="align-middle"><button class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button></td>
+                            <td class="align-middle"><button class="btn btn-sm btn-danger" onclick="removeFromCart('{{this.productId._id}}')"><i class="fa fa-times"></i></button></td>
                         </tr>
                         {{/each}}
                     </tbody>
@@ -285,6 +285,26 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <script>
+        function removeFromCart(productId){
+            console.log('Hey there, this is removeFromCart');
+            console.log(productId);
+            fetch('/removeFromCart',{
+                method:'post',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({ productId })
+            }).then((response) => {
+                console.log('Reached in then of removeFromCart fetch');
+                response.json();
+                window.location.reload();
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+    </script>
 </body>
 
 </html>

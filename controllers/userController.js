@@ -150,14 +150,26 @@ module.exports = {
     },
 
     cartPage: async (req, res) => {
-        if (req.session.customer) {
-            const userEmail = req.session.customer;
-            const user = await Users.findOne({ Email: userEmail });
-            const userId = user._id;
-            const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
-            const productDetails = userCart.cartItems;
-            res.render('user/cart', { cartProducts: productDetails });
-        } else {
+        try {
+            if (req.session.customer) {
+                const userEmail = req.session.customer;
+                const user = await Users.findOne({ Email: userEmail });
+                const userId = user._id;
+                const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
+                if (!userCart) {
+                    res.render('user/cart', { message: 'Cart is empty... Continue shopping...' });
+                } else {
+                    const productDetails = userCart.cartItems;
+                    if (productDetails.length != 0) {
+                        res.render('user/cart', { cartProducts: productDetails });
+                    } else if (productDetails.length == 0) {
+                        res.render('user/cart', { message: 'Cart is empty... Continue shopping...' });
+                    }
+                }
+            } else {
+                res.redirect('/login');
+            }
+        } catch (error) {
             res.redirect('/login');
         }
     },
@@ -170,6 +182,8 @@ module.exports = {
                 let userId = user._id;
                 const userCart = await carts.findOne({ userId: userId });
                 const { productId } = req.body;
+                const product = await products.findOne({_id:productId});
+                const productPrice = product.Price;
                 if (userCart) {
                     const productExist = await carts.findOne({ "cartItems.productId": productId });
                     if (productExist == null) {
@@ -180,13 +194,29 @@ module.exports = {
                 } else {
                     const cart = new carts({
                         userId: userId,
-                        cartItems: { productId: productId }
+                        cartItems: { productId: productId },
                     })
                     cart.save();
                 }
             } else {
                 res.redirect('/login');
             }
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    changeQuantity: async (req, res) => {
+        try {
+            let { product, count } = req.body;
+            count = parseInt(count);
+            product = mongoose.Types.ObjectId(product);
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({ Email: userEmail });
+            const userId = user._id;
+            await carts.updateOne({ userId: userId, 'cartItems.productId': product }, { $inc: { 'cartItems.$.quantity': count } }).then((response) => {
+                res.json(response);
+            });
         } catch (error) {
             console.log(error.message);
         }
@@ -212,8 +242,16 @@ module.exports = {
             const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
             const userWishList = await wishlists.findOne({ userId: userId }).populate('productId').lean();
-            const productArray = userWishList.productId;
-            res.render('user/wishlist', { wishlistProducts: productArray });
+            if (!userWishList) {
+                res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
+            } else {
+                const productArray = userWishList.productId;
+                if (productArray.length != 0) {
+                    res.render('user/wishlist', { wishlistProducts: productArray });
+                } else {
+                    res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
+                }
+            }
         } else {
             res.redirect('/login');
         }

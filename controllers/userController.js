@@ -156,14 +156,26 @@ module.exports = {
                 const user = await Users.findOne({ Email: userEmail });
                 const userId = user._id;
                 const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
+                let subTotal = 0;
+                let shippingCost = 0;
+                let total = 0;
                 if (!userCart) {
                     res.render('user/cart', { message: 'Cart is empty... Continue shopping...' });
                 } else {
+                    const cart_Items = userCart.cartItems;
+                    cart_Items.forEach((x) => {
+                        subTotal = subTotal + (x.productId.Price * x.quantity);
+                    })
+                    if(subTotal>20000) shippingCost = 0;
+                    else shippingCost = 50;
+                    total = subTotal + shippingCost;
                     const productDetails = userCart.cartItems;
                     if (productDetails.length != 0) {
-                        res.render('user/cart', { cartProducts: productDetails });
+                        res.render('user/cart', { cartProducts: productDetails,subTotal:subTotal, shippingCost:shippingCost, total:total });
                     } else if (productDetails.length == 0) {
-                        res.render('user/cart', { message: 'Cart is empty... Continue shopping...' });
+                        shippingCost = 0;
+                        total = 0;
+                        res.render('user/cart', { message: 'Cart is empty... Continue shopping...',subTotal:subTotal, shippingCost:shippingCost, total:total });
                     }
                 }
             } else {
@@ -182,7 +194,7 @@ module.exports = {
                 let userId = user._id;
                 const userCart = await carts.findOne({ userId: userId });
                 const { productId } = req.body;
-                const product = await products.findOne({_id:productId});
+                const product = await products.findOne({ _id: productId });
                 const productPrice = product.Price;
                 if (userCart) {
                     const productExist = await carts.findOne({ "cartItems.productId": productId });
@@ -206,7 +218,7 @@ module.exports = {
         }
     },
 
-    changeQuantity: async (req, res) => {
+    changeQuantity: async (req, res, next) => {
         try {
             let { product, count } = req.body;
             count = parseInt(count);
@@ -214,9 +226,15 @@ module.exports = {
             const userEmail = req.session.customer;
             const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
-            await carts.updateOne({ userId: userId, 'cartItems.productId': product }, { $inc: { 'cartItems.$.quantity': count } }).then((response) => {
-                res.json(response);
-            });
+            const currentQuantity = await carts.findOne({ userId: userId, 'cartItems.productId': product }, { cartItems: { $elemMatch: { productId: product } } });
+            const value = currentQuantity.cartItems[0].quantity;
+            if (!(value == 1 && count == -1)) {
+                await carts.updateOne({ userId: userId, 'cartItems.productId': product }, { $inc: { 'cartItems.$.quantity': count } }).then((response) => {
+                    res.json(response);
+                }).catch((err) => console.log(err));
+            } else {
+                next();
+            }
         } catch (error) {
             console.log(error.message);
         }
@@ -294,6 +312,10 @@ module.exports = {
 
     checkoutPage: (req, res) => {
         res.render('user/checkout');
+    },
+
+    placeOrder: (req,res) => {
+        console.log(req.body);
     },
 
     userLogout: (req, res) => {

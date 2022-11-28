@@ -131,9 +131,8 @@
                         <tr>
                             <td class="align-middle"><b><a href="/singleProduct/{{this.productId._id}}"
                                         class="text-dark">{{this.productId.Name}}</a></b></td>
-                            <td class="align-middle"><img src="{{this.productId.imageurl}}" alt="" style="width: 40px;">
-                            </td>
-                            <td class="align-middle" id="price">₹{{this.productId.Price}}</td>
+                            <td class="align-middle"><img src="{{this.productId.imageurl}}" alt="" style="width: 40px;"></td>
+                            <td class="align-middle" id="price{{this.productId._id}}">₹{{this.productId.Price}}</td>
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
@@ -142,7 +141,7 @@
                                             <i class="fa fa-minus"></i>
                                         </button>
                                     </div>
-                                    <input type="text" id='quantity' class="form-control form-control-sm bg-secondary border-0 text-center" value="{{this.quantity}}">
+                                    <input type="text" id='quantity{{this.productId._id}}' class="form-control form-control-sm bg-secondary border-0 text-center" value="{{this.quantity}}">
                                     <div class="input-group-btn">
                                         <button class="btn btn-sm btn-primary btn-plus"
                                             onclick="changeQuantity('{{this.productId._id}}',1)">
@@ -151,7 +150,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="align-middle" id="eachTotal">₹{{this.productId.Price}}</td>
+                            <td class="align-middle" id="productTotal{{this.productId._id}}">₹{{#multiply this.productId.Price this.quantity}}{{/multiply}}</td>
                             <td class="align-middle">
                                 <button class="btn btn-sm btn-danger" onclick="removeFromCart('{{this.productId._id}}')"><i class="fa fa-times"></i></button>
                             </td>
@@ -162,31 +161,31 @@
                 <div class="pl-1"><h2>{{message}}</h2></div>
             </div>
             <div class="col-lg-4">
-                <form class="mb-30" action="">
+                {{!-- <form class="mb-30" action="">
                     <div class="input-group">
                         <input type="text" class="form-control border-0 p-4" placeholder="Coupon Code">
                         <div class="input-group-append">
                             <button class="btn btn-primary">Apply Coupon</button>
                         </div>
                     </div>
-                </form>
+                </form> --}}
                 <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Cart
                         Summary</span></h5>
                 <div class="bg-light p-30 mb-5">
                     <div class="border-bottom pb-2">
                         <div class="d-flex justify-content-between mb-3">
                             <h6>Subtotal</h6>
-                            <h6>$150</h6>
+                            <h6 id="subtotal">₹{{subTotal}}</h6>
                         </div>
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">Shipping</h6>
-                            <h6 class="font-weight-medium">$10</h6>
+                            <h6 class="font-weight-medium" id="shippingcost">₹{{shippingCost}}</h6>
                         </div>
                     </div>
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>Total</h5>
-                            <h5>$160</h5>
+                            <h5 id="total">₹{{total}}</h5>
                         </div>
                         <a href="/checkout"><button class="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed
                                 To Checkout</button></a>
@@ -303,27 +302,28 @@
                 },
                 method: 'post',
                 success: (response) => {
-                    let price = document.getElementById('price').innerHTML.replace( /^\D+/g, '');
-                    let quantity = document.getElementById('quantity').value;
-                    let eachTotal = (price*quantity);
-                    document.getElementById('eachTotal').innerHTML = `₹${eachTotal}`;
-                }
-            })
-        }
+                    let price = $('#price'+proId).html().replace( /^\D+/g, '');
+                    let productCount = $('#quantity'+proId).val();
+                    $('#productTotal'+proId).html('₹'+productCount * price);
 
-        function eachTotalSave(){
-            $.ajax({
-                url: '/eachTotalSave',
-                data: {
-                    product: proId,
-                    count: count
-                },
-                method: 'post',
-                success: (response) => {
-                    let price = document.getElementById('price').innerHTML.replace( /^\D+/g, '');
-                    let quantity = document.getElementById('quantity').value;
-                    let eachTotal = (price*quantity);
-                    document.getElementById('eachTotal').innerHTML = `₹${eachTotal}`;
+                    let current_subTotal = $('#subtotal').html().replace( /^\D+/g, '');
+                    current_subTotal = parseInt(current_subTotal);
+                    $('#subtotal').html('₹'+(current_subTotal+(count*price)))
+
+                    let shipping_Cost = 0;
+                    if(current_subTotal<20000){
+                        $('#shippingcost').html('₹50');
+                        shipping_Cost = 50;
+                        console.log(shipping_Cost);
+                    }else{
+                        $('#shippingcost').html('₹0');
+                        shipping_Cost = 0;
+                        console.log(shipping_Cost);
+                    }
+
+                    let currentTotal = $('#subtotal').html().replace( /^\D+/g, '');
+                    currentTotal = parseInt(currentTotal);
+                    $('#total').html('₹'+(currentTotal+shipping_Cost));
                 }
             })
         }

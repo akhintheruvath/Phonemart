@@ -30,6 +30,10 @@ Handlebars.registerHelper("inc", function(value, options)
     return parseInt(value) + 1;
 });
 
+Handlebars.registerHelper("multiply",function(value1,value2){
+    return value1 * value2;
+});
+
 app.use(
     session({
         name: "session-1",

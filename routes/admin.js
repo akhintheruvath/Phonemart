@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminController');
 const customerController = require('../controllers/customerController');
 const categoryController = require('../controllers/categoryController');
 const productController = require('../controllers/productController');
+const couponController = require('../controllers/couponController');
 const upload = require('../middlewares/multer');
 
 router.get('/',adminController.loginGet);
@@ -28,6 +29,12 @@ router.get('/categoryEdit/:id',categoryController.categoryEditGet);
 router.post('/categoryEdit/:id',categoryController.categoryEditPost);
 router.get('/categoryDisable/:id',categoryController.disableCategory);
 router.get('/categoryEnable/:id',categoryController.enableCategory);
+
+router.get('/coupons',couponController.couponPage);
+router.post('/coupons',couponController.addCouponPost);
+router.get('/couponEdit/:id',couponController.couponEditPage);
+router.post('/couponEdit/:id',couponController.couponEditPost);
+router.post('/disableOrEnable',couponController.disableOrEnable);
 
 router.get('/adminLogout',adminController.adminLogout);
 

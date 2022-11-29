@@ -4,16 +4,17 @@ const products = require('../models/productModel');
 const categories = require('../models/categoryModel');
 const carts = require('../models/cartModel');
 const wishlists = require('../models/wishlistModel');
+const coupons = require('../models/couponModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-// const { resolve } = require('path');
 
 let msg = '';
 let msg2 = '';
 let customerId;
 let otpmsg = '';
 let userName, Email, Password;
+let totalPrice;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -149,6 +150,62 @@ module.exports = {
         res.render('user/singleProduct', { productData });
     },
 
+    wishlistPage: async (req, res) => {
+        if (req.session.customer) {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({ Email: userEmail });
+            const userId = user._id;
+            const userWishList = await wishlists.findOne({ userId: userId }).populate('productId').lean();
+            if (!userWishList) {
+                res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
+            } else {
+                const productArray = userWishList.productId;
+                if (productArray.length != 0) {
+                    res.render('user/wishlist', { wishlistProducts: productArray });
+                } else {
+                    res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
+                }
+            }
+        } else {
+            res.redirect('/login');
+        }
+    },
+
+    addToWishlist: async (req, res) => {
+        if (req.session.customer) {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({ Email: userEmail });
+            let userId = user._id;
+            const userWishList = await wishlists.findOne({ userId: userId });
+            const { productId } = req.body;
+            const product_id = mongoose.Types.ObjectId(productId);
+            if (userWishList) {
+                const products = userWishList.productId;
+                const existStatus = await products.includes(product_id, 0);
+                const user_id = mongoose.Types.ObjectId(userId).toString();
+                if (!existStatus) {
+                    await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
+                } else {
+                    await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
+                        res.json(response);
+                    })
+                }
+            } else {
+                try {
+                    const wishlist = new wishlists({
+                        userId: userId,
+                        productId: product_id
+                    })
+                    await wishlist.save();
+                } catch (error) {
+                    console.log(error.message);
+                }
+            }
+        } else {
+            res.redirect('/login');
+        }
+    },
+
     cartPage: async (req, res) => {
         try {
             if (req.session.customer) {
@@ -254,68 +311,35 @@ module.exports = {
         }
     },
 
-    wishlistPage: async (req, res) => {
-        if (req.session.customer) {
-            const userEmail = req.session.customer;
-            const user = await Users.findOne({ Email: userEmail });
-            const userId = user._id;
-            const userWishList = await wishlists.findOne({ userId: userId }).populate('productId').lean();
-            if (!userWishList) {
-                res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
-            } else {
-                const productArray = userWishList.productId;
-                if (productArray.length != 0) {
-                    res.render('user/wishlist', { wishlistProducts: productArray });
-                } else {
-                    res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
-                }
-            }
-        } else {
-            res.redirect('/login');
-        }
+    applyCoupon: async (req,res) => {
+        let { couponCode } = req.body;
+        couponCode = couponCode.toUpperCase();
+        await coupons.findOne({ couponCode:couponCode,Disable:false }).then((result) => {
+            res.json(result);
+        });
     },
 
-    addToWishlist: async (req, res) => {
-        if (req.session.customer) {
-            const userEmail = req.session.customer;
-            const user = await Users.findOne({ Email: userEmail });
-            let userId = user._id;
-            const userWishList = await wishlists.findOne({ userId: userId });
-            const { productId } = req.body;
-            const product_id = mongoose.Types.ObjectId(productId);
-            if (userWishList) {
-                const products = userWishList.productId;
-                const existStatus = await products.includes(product_id, 0);
-                const user_id = mongoose.Types.ObjectId(userId).toString();
-                if (!existStatus) {
-                    await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
-                } else {
-                    await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
-                        res.json(response);
-                    })
-                }
-            } else {
-                try {
-                    const wishlist = new wishlists({
-                        userId: userId,
-                        productId: product_id
-                    })
-                    await wishlist.save();
-                } catch (error) {
-                    console.log(error.message);
-                }
-            }
-        } else {
-            res.redirect('/login');
-        }
+    proceedtoCheckout: (req, res) => {
+        const { total } = req.body;
+        totalPrice = parseInt(total.replace( /^\D+/g, ''));
+        console.log(totalPrice);
+        res.json({status:true});
     },
 
-    checkoutPage: (req, res) => {
-        res.render('user/checkout');
+    checkoutPage: (req,res) => {
+        res.render('user/checkout',{ total:totalPrice });
     },
 
-    placeOrder: (req,res) => {
-        console.log(req.body);
+    placeOrder: async (req,res) => {
+        const { paymentMethod } = req.body;
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        let cart = await carts.findOne({userId:userId});
+        // const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
+        console.log(cart);
+        cartProducts = cart.cartItems;
+        console.log(cartProducts);
     },
 
     userLogout: (req, res) => {

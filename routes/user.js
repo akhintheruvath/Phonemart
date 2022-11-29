@@ -17,6 +17,8 @@ router.get('/cart',userController.cartPage);
 router.post('/addToCart',userController.addToCart);
 router.post('/changeQuantity',userController.changeQuantity);
 router.post('/removeFromCart',userController.removeFromCart);
+router.post('/applyCoupon',userController.applyCoupon);
+router.post('/proceedtoCheckout',userController.proceedtoCheckout);
 router.get('/checkout',userController.checkoutPage);
 router.post('/placeOrder',userController.placeOrder);
 router.get('/wishlist',userController.wishlistPage);

@@ -161,15 +161,17 @@
                 <div class="pl-1"><h2>{{message}}</h2></div>
             </div>
             <div class="col-lg-4">
-                {{!-- <form class="mb-30" action="">
+                <form id="couponForm">
                     <div class="input-group">
-                        <input type="text" class="form-control border-0 p-4" placeholder="Coupon Code">
+                        <input type="text" name="couponCode" class="form-control border-0 p-4" placeholder="Coupon Code">
                         <div class="input-group-append">
-                            <button class="btn btn-primary">Apply Coupon</button>
+                            <button class="btn btn-primary" type="submit">Apply Coupon</button>
                         </div>
                     </div>
-                </form> --}}
-                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Cart
+                </form>
+                <p id="invalidCoupon" class="text-danger mt-1 mb-4 ml-1 d-none">Invalid coupon code</p>
+                <p id="couponApplied" class="text-success mt-1 mb-4 ml-1 d-none">Coupon Applied</p>
+                <h5 class="section-title position-relative text-uppercase mt-5 mb-3"><span class="bg-secondary pr-3">Cart
                         Summary</span></h5>
                 <div class="bg-light p-30 mb-5">
                     <div class="border-bottom pb-2">
@@ -181,13 +183,17 @@
                             <h6 class="font-weight-medium">Shipping</h6>
                             <h6 class="font-weight-medium" id="shippingcost">₹{{shippingCost}}</h6>
                         </div>
+                        <div class="d-flex justify-content-between my-3">
+                            <h6 class="font-weight-medium d-none" id="discount">Discount</h6>
+                            <h6 class="font-weight-medium d-none" id="discountPrice"></h6>
+                        </div>
                     </div>
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>Total</h5>
                             <h5 id="total">₹{{total}}</h5>
                         </div>
-                        <a href="/checkout"><button class="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed
+                        <a><button onclick="proceedtoCheckout()" class="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed
                                 To Checkout</button></a>
                     </div>
                 </div>
@@ -314,11 +320,9 @@
                     if(current_subTotal<20000){
                         $('#shippingcost').html('₹50');
                         shipping_Cost = 50;
-                        console.log(shipping_Cost);
                     }else{
                         $('#shippingcost').html('₹0');
                         shipping_Cost = 0;
-                        console.log(shipping_Cost);
                     }
 
                     let currentTotal = $('#subtotal').html().replace( /^\D+/g, '');
@@ -340,6 +344,63 @@
                 },
                 error: () => {
                     alert('Error occured');
+                }
+            })
+        }
+
+        let count = 0;
+
+        $('#couponForm').submit((e) => {
+            e.preventDefault();
+            $.ajax({
+                url:'/applyCoupon',
+                method:'post',
+                data:$('#couponForm').serialize(),
+                success:(result) => {
+                    if(result){
+                        if(count==0){
+                            count = 1;
+                            let shipping_Cost = 0;
+                            let currentSubTotal = parseInt($('#subtotal').html().replace( /^\D+/g, ''));
+                            console.log(currentSubTotal);
+                            if(currentSubTotal<20000){
+                                $('#shippingcost').html('₹50');
+                                shipping_Cost = 50;
+                            }else{
+                                $('#shippingcost').html('₹0');
+                                shipping_Cost = 0;
+                            }
+
+                            $('#invalidCoupon').addClass('d-none');
+                            $('#couponApplied').removeClass('d-none');
+                            let discount = result.discountPercentage;
+                            let subTotal = $('#subtotal').html().replace( /^\D+/g, '');
+                            let discountPrice = Math.round(subTotal*discount/100);
+                            subTotal = subTotal - discountPrice;
+                            $('#discount').removeClass('d-none');
+                            $('#discountPrice').removeClass('d-none');
+                            $('#discountPrice').html('₹'+discountPrice);
+                            $('#total').html('₹'+(subTotal+shipping_Cost));
+                        }
+                    }else{
+                        $('#invalidCoupon').removeClass('d-none');
+                        $('#couponApplied').addClass('d-none');
+                    }
+                }
+            })
+        })
+
+        function proceedtoCheckout(){
+            let total = document.getElementById('total').innerHTML;
+
+            $.ajax({
+                url:'/proceedtoCheckout',
+                method:'post',
+                data:{
+                    total:total
+                },
+                success: (response) => {
+                    location.href = '/checkout'
                 }
             })
         }

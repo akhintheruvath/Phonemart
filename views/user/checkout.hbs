@@ -24,7 +24,9 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -108,82 +110,86 @@
             <div class="row px-xl-5">
                 <div class="col-lg-8">
                     <h5 class="section-title position-relative text-uppercase mb-3">
-                        <span class="bg-secondary pr-3">Billing Address</span></h5>
+                        <span class="bg-secondary pr-3">Billing Address</span>
+                    </h5>
+                    {{#if status}}
+                        {{#each userAddresses}}
+                            <div class="pl-3 pt-3 bg-light p-2">
+                                <div class="form-group">
+                                    <div>
+                                        <input type="radio" name="address" id="{{this._id}}" value="{{this._id}}" required>
+                                        <label class="mr-2 h5" for="{{this._id}}">Address {{inc @index}}</label>
+                                        <input class="px-3 py-1" type="text"
+                                            value="{{this.Name}}, {{this.Mobile}}, {{this.HouseName}}, {{this.PostOfiice}} {{this.City}}, {{this.District}}, {{this.State}}, {{this.PIN}}"
+                                            readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {{/each}}
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-success mt-3 rounded-pill" data-toggle="modal"
+                            data-target="#exampleModal">
+                            + Add new address
+                        </button>
+                        <input type="text" name="status" value="second" hidden>
+                    {{else}}
                     <div class="bg-light p-30 mb-5">
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label>Name</label>
-                                <input id="name" name="name" class="form-control" type="text" placeholder="Enter your name">
+                                <input id="name" name="Name" class="form-control" type="text"
+                                    placeholder="Enter your name" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>E-mail</label>
-                                <input id="email" name="email" class="form-control" type="text" placeholder="example@gmail.com">
+                                <input id="email" name="Email" class="form-control" type="text"
+                                    placeholder="example@gmail.com" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Mobile No</label>
-                                <input id="mobile" name="mobile" class="form-control" type="number" placeholder="Enter your mobile number">
+                                <input id="mobile" name="Mobile" class="form-control" type="number"
+                                    placeholder="Enter your mobile number" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>House Name</label>
-                                <input id="house" name="house" class="form-control" type="text" placeholder="Enter your house name">
+                                <input id="house" name="HouseName" class="form-control" type="text"
+                                    placeholder="Enter your house name" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Post Office</label>
-                                <input id="postOffice" name="postOffice" class="form-control" type="text" placeholder="Enter post office">
+                                <input id="postOffice" name="PostOffice" class="form-control" type="text"
+                                    placeholder="Enter post office" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Nearest city</label>
-                                <input id="city" name="city" class="form-control" type="text" placeholder="Enter your nearest city">
+                                <input id="city" name="City" class="form-control" type="text"
+                                    placeholder="Enter your nearest city" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>District</label>
-                                <input id="district" name="district" class="form-control" type="text" placeholder="Enter your district">
+                                <input id="district" name="District" class="form-control" type="text"
+                                    placeholder="Enter your district" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>State</label>
-                                <input id="state" name="state" class="form-control" type="text" placeholder="Enter your state">
+                                <input id="state" name="State" class="form-control" type="text"
+                                    placeholder="Enter your state" required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Enter PIN code</label>
-                                <input id="pincode" name="pincode" class="form-control" type="number" placeholder="Enter PIN code">
+                                <input id="pincode" name="PIN" class="form-control" type="number"
+                                    placeholder="Enter PIN code" required>
                             </div>
+                            <input type="text" name="status" value="first" hidden>
                         </div>
                     </div>
+                    {{/if}}
                 </div>
                 <div class="col-lg-4">
                     <h5 class="section-title position-relative text-uppercase mb-3"><span
                             class="bg-secondary pr-3">Order
                             Total</span></h5>
                     <div class="bg-light p-30 mb-5">
-                        {{!-- <div class="border-bottom">
-                            <h6 class="mb-3">Products</h6>
-                            <div class="d-flex justify-content-between">
-                                <p>Product Name 1</p>
-                                <p>$150</p>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <p>Product Name 2</p>
-                                <p>$150</p>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <p>Product Name 3</p>
-                                <p>$150</p>
-                            </div>
-                        </div> --}}
-                        {{!-- <div class="border-bottom pt-3 pb-2">
-                            <div class="d-flex justify-content-between mb-3">
-                                <h6>Subtotal</h6>
-                                <h6>$150</h6>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <h6 class="font-weight-medium">Shipping</h6>
-                                <h6 class="font-weight-medium">$10</h6>
-                            </div>
-                            <div class="d-flex justify-content-between mt-3">
-                                <h6 class="font-weight-medium">Discount</h6>
-                                <h6 class="font-weight-medium">$10</h6>
-                            </div>
-                        </div> --}}
                         <div class="pt-2">
                             <div class="d-flex justify-content-between mt-2">
                                 <h5>Total</h5>
@@ -192,24 +198,64 @@
                         </div>
                     </div>
                     <div class="mb-5">
-                        <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Payment</span></h5>
+                        <h5 class="section-title position-relative text-uppercase mb-3"><span
+                                class="bg-secondary pr-3">Payment</span></h5>
                         <div class="bg-light p-30">
                             <div class="form-group">
                                 <div class="custom-control custom-radio">
-                                    <input type="radio" class="custom-control-input" name="paymentMethod" id="COD" value="cod">
+                                    <input type="radio" class="custom-control-input" name="paymentMethod" id="COD"
+                                        value="cod" required>
                                     <label class="custom-control-label" for="COD">Cash on delivery</label>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="custom-control custom-radio">
-                                    <input type="radio" class="custom-control-input" name="paymentMethod" id="ONLINE" value="online">
+                                    <input type="radio" class="custom-control-input" name="paymentMethod" id="ONLINE"
+                                        value="online">
                                     <label class="custom-control-label" for="ONLINE">Online Payment</label>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">Place Order</button>
-                        </div>
+                            <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">Place
+                                Order</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- Modal -->
+    <form action="/newAddress" method="post">
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add new address</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="Name" placeholder="Enter your name">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="Email" placeholder="Enter your Email">
+                        <input type="number" class="pl-2 py-2 pr-5 mb-2" name="Mobile"
+                            placeholder="Enter your mobile number">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="HouseName"
+                            placeholder="Enter your house name">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="PostOffice"
+                            placeholder="Enter your post office">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="City"
+                            placeholder="Enter your nearest city">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="District"
+                            placeholder="Enter your district">
+                        <input type="text" class="pl-2 py-2 pr-5 mb-2" name="State" placeholder="Enter your state">
+                        <input type="number" class="pl-2 py-2 pr-5 mb-2" name="PIN" placeholder="Enter PIN code">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
@@ -315,10 +361,10 @@
         $('#checkoutForm').submit((e) => {
             e.preventDefault();
             $.ajax({
-                url:'/placeOrder',
-                method:'post',
-                data:$('#checkoutForm').serialize(),
-                success:(response) => {
+                url: '/placeOrder',
+                method: 'post',
+                data: $('#checkoutForm').serialize(),
+                success: (response) => {
                     alert(response)
                 }
             })

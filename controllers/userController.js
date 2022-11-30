@@ -5,9 +5,11 @@ const categories = require('../models/categoryModel');
 const carts = require('../models/cartModel');
 const wishlists = require('../models/wishlistModel');
 const coupons = require('../models/couponModel');
+const orders = require('../models/orderModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const addresses = require('../models/addressModel');
 
 let msg = '';
 let msg2 = '';
@@ -223,16 +225,16 @@ module.exports = {
                     cart_Items.forEach((x) => {
                         subTotal = subTotal + (x.productId.Price * x.quantity);
                     })
-                    if(subTotal>20000) shippingCost = 0;
+                    if (subTotal > 20000) shippingCost = 0;
                     else shippingCost = 50;
                     total = subTotal + shippingCost;
                     const productDetails = userCart.cartItems;
                     if (productDetails.length != 0) {
-                        res.render('user/cart', { cartProducts: productDetails,subTotal:subTotal, shippingCost:shippingCost, total:total });
+                        res.render('user/cart', { cartProducts: productDetails, subTotal: subTotal, shippingCost: shippingCost, total: total });
                     } else if (productDetails.length == 0) {
                         shippingCost = 0;
                         total = 0;
-                        res.render('user/cart', { message: 'Cart is empty... Continue shopping...',subTotal:subTotal, shippingCost:shippingCost, total:total });
+                        res.render('user/cart', { message: 'Cart is empty... Continue shopping...', subTotal: subTotal, shippingCost: shippingCost, total: total });
                     }
                 }
             } else {
@@ -252,7 +254,6 @@ module.exports = {
                 const userCart = await carts.findOne({ userId: userId });
                 const { productId } = req.body;
                 const product = await products.findOne({ _id: productId });
-                const productPrice = product.Price;
                 if (userCart) {
                     const productExist = await carts.findOne({ "cartItems.productId": productId });
                     if (productExist == null) {
@@ -265,7 +266,7 @@ module.exports = {
                         userId: userId,
                         cartItems: { productId: productId },
                     })
-                    cart.save();
+                    await cart.save();
                 }
             } else {
                 res.redirect('/login');
@@ -311,35 +312,87 @@ module.exports = {
         }
     },
 
-    applyCoupon: async (req,res) => {
+    applyCoupon: async (req, res) => {
         let { couponCode } = req.body;
         couponCode = couponCode.toUpperCase();
-        await coupons.findOne({ couponCode:couponCode,Disable:false }).then((result) => {
+        await coupons.findOne({ couponCode: couponCode, Disable: false }).then((result) => {
             res.json(result);
         });
     },
 
     proceedtoCheckout: (req, res) => {
         const { total } = req.body;
-        totalPrice = parseInt(total.replace( /^\D+/g, ''));
-        console.log(totalPrice);
-        res.json({status:true});
+        totalPrice = parseInt(total.replace(/^\D+/g, ''));
+        res.json({ status: true });
     },
 
-    checkoutPage: (req,res) => {
-        res.render('user/checkout',{ total:totalPrice });
-    },
-
-    placeOrder: async (req,res) => {
-        const { paymentMethod } = req.body;
+    checkoutPage: async (req, res) => {
         const userEmail = req.session.customer;
         const user = await Users.findOne({ Email: userEmail });
         const userId = user._id;
-        let cart = await carts.findOne({userId:userId});
-        // const userCart = await carts.findOne({ userId: userId }).populate('cartItems.productId').lean();
-        console.log(cart);
-        cartProducts = cart.cartItems;
-        console.log(cartProducts);
+        const userAddress = await addresses.findOne({ userId: userId }).lean();
+        if (userAddress) {
+            const address = userAddress.addresses;
+            res.render('user/checkout', { total: totalPrice, userAddresses: address, status: true });
+        } else {
+            res.render('user/checkout', { total: totalPrice, status: false });
+        }
+    },
+
+    newAddress: async (req, res) => {
+        const { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN } = req.body;
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
+        res.redirect('/checkout');
+    },
+
+    placeOrder: async (req, res) => {
+        let addressId;
+        const { status, paymentMethod,address } = req.body;
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        const cartId = (await carts.findOne({userId:userId}))._id;
+        const order = await orders.findOne({userId});
+        const adr = await addresses.findOne({ userId: userId });
+        if (status == 'first') {
+            const { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN } = req.body;
+            if (adr) {
+                await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
+                addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
+                addressId = mongoose.Types.ObjectId(addressId);
+            } else {
+                const address = new addresses({
+                    userId: userId,
+                    addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN }
+                });
+                await address.save();
+                addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
+                addressId = mongoose.Types.ObjectId(addressId);
+            }
+            if(order){
+
+            }else{
+                const order = new orders({
+                    userId,
+                    orderDetails: { paymentMethod, addressId, cartId }
+                });
+                await order.save();
+            }
+        } else {
+            addressId = mongoose.Types.ObjectId(address);
+            if(order){
+
+            }else{
+                const order = new orders({
+                    userId,
+                    orderDetails: { paymentMethod, addressId, cartId }
+                });
+                await order.save();
+            }
+        }
     },
 
     userLogout: (req, res) => {

@@ -20,6 +20,7 @@ router.post('/removeFromCart',userController.removeFromCart);
 router.post('/applyCoupon',userController.applyCoupon);
 router.post('/proceedtoCheckout',userController.proceedtoCheckout);
 router.get('/checkout',userController.checkoutPage);
+router.post('/newAddress',userController.newAddress);
 router.post('/placeOrder',userController.placeOrder);
 router.get('/wishlist',userController.wishlistPage);
 router.post('/addToWishlist',userController.addToWishlist);

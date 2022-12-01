@@ -12,9 +12,11 @@ router.get('/otpPage',userController.otpPageGet);
 router.post('/otpPage',userController.otpPost);
 router.get('/shop',userController.shopGet);
 router.get('/singleProduct/:id',userController.singleProduct);
-
 router.get('/cart',userController.cartPage);
 router.post('/addToCart',userController.addToCart);
+router.get('/wishlist',userController.wishlistPage);
+router.post('/addToWishlist',userController.addToWishlist);
+router.use(auth);
 router.post('/changeQuantity',userController.changeQuantity);
 router.post('/removeFromCart',userController.removeFromCart);
 router.post('/applyCoupon',userController.applyCoupon);
@@ -22,9 +24,9 @@ router.post('/proceedtoCheckout',userController.proceedtoCheckout);
 router.get('/checkout',userController.checkoutPage);
 router.post('/newAddress',userController.newAddress);
 router.post('/placeOrder',userController.placeOrder);
-router.get('/wishlist',userController.wishlistPage);
-router.post('/addToWishlist',userController.addToWishlist);
-
+router.get('/orderConfirmationPage',userController.orderConfirmationPage);
+router.get('/orders',userController.orderPage);
+router.get('/viewProducts/:id',userController.viewProducts);
 router.get('/logout',userController.userLogout);
 
 module.exports = router;

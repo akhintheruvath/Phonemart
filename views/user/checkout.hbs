@@ -204,14 +204,14 @@
                             <div class="form-group">
                                 <div class="custom-control custom-radio">
                                     <input type="radio" class="custom-control-input" name="paymentMethod" id="COD"
-                                        value="cod" required>
+                                        value="Cash on Delivery" required>
                                     <label class="custom-control-label" for="COD">Cash on delivery</label>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="custom-control custom-radio">
                                     <input type="radio" class="custom-control-input" name="paymentMethod" id="ONLINE"
-                                        value="online">
+                                        value="Online Payment">
                                     <label class="custom-control-label" for="ONLINE">Online Payment</label>
                                 </div>
                             </div>
@@ -365,7 +365,8 @@
                 method: 'post',
                 data: $('#checkoutForm').serialize(),
                 success: (response) => {
-                    alert(response)
+                    console.log(response.status);
+                    location.href = '/orderConfirmationPage';
                 }
             })
         })

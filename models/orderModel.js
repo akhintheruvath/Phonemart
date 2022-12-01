@@ -9,24 +9,41 @@ const orderSchema = new mongoose.Schema({
     orderDetails: [{
         paymentMethod: String,
 
-        addressId: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: 'addresses'
+        address: {
+            Name: String,
+            Email: String,
+            Mobile: Number,
+            HouseName: String,
+            PostOffice: String,
+            City: String,
+            District: String,
+            State: String,
+            PIN: Number
         },
 
-        cartId: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: 'carts'
+        orderItems: [{
+            productId: {
+                type: mongoose.SchemaTypes.ObjectId,
+                ref: 'products'
+            },
+    
+            quantity: {
+                type: Number,
+                default: 1
+            }
+        }],
+
+        totalPrice : Number,
+
+        status: {
+            type: String,
+            default: 'Order placed'
         },
 
         createdAt: {
             type: Date,
             default: Date.now(),
             immutable: true
-        },
-        status: {
-            type: String,
-            default: 'Order placed'
         }
     }]
 });

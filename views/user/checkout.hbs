@@ -113,25 +113,25 @@
                         <span class="bg-secondary pr-3">Billing Address</span>
                     </h5>
                     {{#if status}}
-                        {{#each userAddresses}}
-                            <div class="pl-3 pt-3 bg-light p-2">
-                                <div class="form-group">
-                                    <div>
-                                        <input type="radio" name="address" id="{{this._id}}" value="{{this._id}}" required>
-                                        <label class="mr-2 h5" for="{{this._id}}">Address {{inc @index}}</label>
-                                        <input class="px-3 py-1" type="text"
-                                            value="{{this.Name}}, {{this.Mobile}}, {{this.HouseName}}, {{this.PostOfiice}} {{this.City}}, {{this.District}}, {{this.State}}, {{this.PIN}}"
-                                            readonly>
-                                    </div>
-                                </div>
+                    {{#each userAddresses}}
+                    <div class="pl-3 pt-3 bg-light p-2">
+                        <div class="form-group">
+                            <div>
+                                <input type="radio" name="address" id="{{this._id}}" value="{{this._id}}" required>
+                                <label class="mr-2 h5" for="{{this._id}}">Address {{inc @index}}</label>
+                                <input class="px-3 py-1" type="text"
+                                    value="{{this.Name}}, {{this.Mobile}}, {{this.HouseName}}, {{this.PostOfiice}} {{this.City}}, {{this.District}}, {{this.State}}, {{this.PIN}}"
+                                    readonly>
                             </div>
-                        {{/each}}
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-success mt-3 rounded-pill" data-toggle="modal"
-                            data-target="#exampleModal">
-                            + Add new address
-                        </button>
-                        <input type="text" name="status" value="second" hidden>
+                        </div>
+                    </div>
+                    {{/each}}
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-success my-3 rounded-pill" data-toggle="modal"
+                        data-target="#exampleModal">
+                        + Add new address
+                    </button>
+                    <input type="text" name="status" value="second" hidden>
                     {{else}}
                     <div class="bg-light p-30 mb-5">
                         <div class="row">
@@ -215,7 +215,8 @@
                                     <label class="custom-control-label" for="ONLINE">Online Payment</label>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">Place
+                            <button type="submit" id="pay-button"
+                                class="btn btn-block btn-primary font-weight-bold py-3">Place
                                 Order</button>
                         </div>
                     </div>
@@ -366,10 +367,63 @@
                 data: $('#checkoutForm').serialize(),
                 success: (response) => {
                     console.log(response.status);
-                    location.href = '/orderConfirmationPage';
+                    if (response.status) location.href = '/orderConfirmationPage';
+                    else {
+                        razorPayment(response);
+                    }
                 }
             })
         })
+
+        function razorPayment(order) {
+            let options = {
+                'key': 'rzp_test_byX4xjQdkJOyzX',
+                'amount': order.amount,
+                'currency': 'INR',
+                'name': 'PHONEMART',
+                'description': 'PHONEMART cash transaction',
+                'order_id': order.id,
+                'handler': (response) => {
+                    alert(response.razorpay_payment_id)
+                    alert(response.razorpay_order_id)
+                    alert(response.razorpay_signature)
+
+                    verifyPayment(response, order)
+                },
+                'prefill': {
+                    'name': 'user',
+                    'contact': '9999999999',
+                    'email': 'user@gmail.com'
+                },
+                'notes': {
+                    'address': 'Razorpay Corporate Office'
+                },
+                'theme': {
+                    'color': '#F37254'
+                }
+            }
+            let rzp1 = new Razorpay(options)
+            rzp1.open();
+        }
+
+        function verifyPayment(payment, order) {
+            $.ajax({
+                url: '/verifyPayment',
+                data: {
+                    payment,
+                    order
+                },
+                method: 'post',
+                success: (response) => {
+                    console.log('sett');
+                    if (response.status) {
+                        location.href = '/confirmation'
+                    } else {
+                        alert('Payment failed')
+                    }
+                }
+            })
+        }
     </script>
 </body>
 

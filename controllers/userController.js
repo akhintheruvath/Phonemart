@@ -9,6 +9,7 @@ const orders = require('../models/orderModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const Razorpay = require('razorpay');
 const addresses = require('../models/addressModel');
 
 let msg = '';
@@ -27,6 +28,12 @@ let mailTransporter = nodemailer.createTransport({
 });
 
 const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
+
+
+const razorpayInstance = new Razorpay({
+    key_id:'rzp_test_eXHeIXDXI5A5em',
+    key_secret:'FTzFyk2RIsK7R92rZ0zkCW7X'
+})
 
 module.exports = {
     homeGet: async (req, res) => {
@@ -289,7 +296,7 @@ module.exports = {
             if (!(value == 1 && count == -1)) {
                 await carts.updateOne({ userId: userId, 'cartItems.productId': product }, { $inc: { 'cartItems.$.quantity': count } }).then((response) => {
                     res.json(response);
-                }).catch((err) => console.log(err));
+                }).catch((err) => console.log(err.message));
             } else {
                 next();
             }
@@ -359,8 +366,7 @@ module.exports = {
             const userEmail = req.session.customer;
             const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
-            const orderItems = (await carts.findOne({ userId:userId })).cartItems;
-            console.log(orderItems);
+            const orderItems = (await carts.findOne({ userId: userId })).cartItems;
             const order = await orders.findOne({ userId });
             const adr = await addresses.findOne({ userId: userId });
             if (status == 'first') {
@@ -378,37 +384,73 @@ module.exports = {
                     addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
                     addressId = mongoose.Types.ObjectId(addressId);
                 }
-                if (order) {
-                    const shippingAddress = ((await addresses.findOne({ userId: userId, 'addresses._id': addressId })).addresses)[0];
-                    await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
-                    await carts.deleteOne({userId});
+
+                if (paymentMethod == 'Cash on Delivery') {
+                    if (order) {
+                        const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                        await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
+                        await carts.deleteOne({ userId });
+                    } else {
+                        const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                        const order = new orders({
+                            userId,
+                            orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
+                        });
+                        await order.save();
+                        await carts.deleteOne({ userId });
+                    }
+                    res.json({ status: true });
                 } else {
-                    const shippingAddress = ((await addresses.findOne({ userId: userId, 'addresses._id': addressId })).addresses)[0];
-                    const order = new orders({
-                        userId,
-                        orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
-                    });
-                    await order.save();
-                    await carts.deleteOne({userId});
+                    let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
+                    let total = order.orderDetails[0].totalPrice;
+
+                    let options = {
+                        amount: total * 100,
+                        currency: 'INR',
+                        receipt: '' + order.orderDetails[0]._id
+                    }
+                    razorpayInstance.orders.create(options,
+                        (err, order) => {
+                            if (!err) res.json(order);
+                            else res.send(err);
+                        }
+                    )
                 }
             } else {
-                addressId = mongoose.Types.ObjectId(address);
-                const shippingAddress = ((await addresses.findOne({ userId: userId, 'addresses._id': addressId })).addresses)[0];
-                if (order) {
-                    await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
-                    await carts.deleteOne({userId});
+                addressId = address;
+                if (paymentMethod == 'Cash on Delivery') {
+                    const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                    if (order) {
+                        await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
+                        await carts.deleteOne({ userId });
+                    } else {
+                        const order = new orders({
+                            userId,
+                            orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
+                        });
+                        await order.save();
+                        await carts.deleteOne({ userId });
+                    }
+                    res.json({ status: true });
                 } else {
-                    const order = new orders({
-                        userId,
-                        orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
-                    });
-                    await order.save();
-                    await carts.deleteOne({userId});
+                    let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
+                    let total = order.orderDetails[0].totalPrice;
+
+                    let options = {
+                        amount: total * 100,
+                        currency: 'INR',
+                        receipt: '' + order.orderDetails[0]._id
+                    }
+                    razorpayInstance.orders.create(options,
+                        (err, order) => {
+                            if (!err) res.json(order);
+                            else res.send(err);
+                        }
+                    )
                 }
             }
-            res.json({ status: true });
         } catch (error) {
-            console.log('Error occured in placeorder');
+            console.log('Error occured in placeOrder');
             console.log(error.message);
         }
     },
@@ -422,31 +464,31 @@ module.exports = {
         res.render('user/orderConfirmationPage', { orderDetails, date });
     },
 
-    orderPage: async (req,res) => {
+    orderPage: async (req, res) => {
         const userEmail = req.session.customer;
         const userId = (await Users.findOne({ Email: userEmail }))._id;
         let allOrders = await orders.findOne({ userId }).lean();
-        allOrders = allOrders.orderDetails;
-        allOrders.forEach(e=>{
-            date = e.createdAt
-            e.date = date.toDateString()
-        })
-        res.render('user/orderPage',{ allOrders });
+        if (allOrders) {
+            allOrders = allOrders.orderDetails;
+            allOrders.forEach(e => {
+                date = e.createdAt;
+                e.date = date.toDateString();
+            })
+            res.render('user/orderPage', { allOrders });
+        } else {
+            res.render('user/orderPage', { message: 'No orders found... Continue shopping...' });
+        }
     },
 
-    viewProducts: async (req,res) => {
-        console.log('Hello');
-        let orderId  = req.params.id;
+    viewProducts: async (req, res) => {
+        let orderId = req.params.id;
         orderId = mongoose.Types.ObjectId(orderId);
-        console.log(orderId);
         const userEmail = req.session.customer;
         const userId = (await Users.findOne({ Email: userEmail }))._id;
-        // const order = await orders.findOne({userId},{orderDetails:{$slice:-1}});
-        // const orderId = (order.orderDetails)[0]._id;
-        // console.log(orderId);
-        const orderDetails = (await orders.findOne({userId},{orderDetails:{$elemMatch:{_id:orderId}}}).populate('orderDetails.orderItems.productId')).orderDetails;
+        const order = await orders.findOne({ userId }, { orderDetails: { $elemMatch: { _id: orderId } } }).populate('orderDetails.orderItems.productId').lean();
+        const orderDetails = order.orderDetails;
         const orderItems = orderDetails[0].orderItems;
-        // res.render('user/orderPage',{ orderDetails:orderDetails[0] });
+        res.render('user/viewProducts', { orderItems });
     },
 
     userLogout: (req, res) => {

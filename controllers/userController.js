@@ -18,6 +18,9 @@ let customerId;
 let otpmsg = '';
 let userName, Email, Password;
 let totalPrice;
+let addressFromAnotherFunction;
+let paymentMethodAnotherFunction;
+let totalFromAnotherFunction;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -26,14 +29,12 @@ let mailTransporter = nodemailer.createTransport({
         pass: "mutcxknugedxvkxk",
     },
 });
-
 const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
 
-
 const razorpayInstance = new Razorpay({
-    key_id:'rzp_test_eXHeIXDXI5A5em',
-    key_secret:'FTzFyk2RIsK7R92rZ0zkCW7X'
-})
+    key_id: 'rzp_test_eXHeIXDXI5A5em',
+    key_secret: 'FTzFyk2RIsK7R92rZ0zkCW7X'
+});
 
 module.exports = {
     homeGet: async (req, res) => {
@@ -334,15 +335,19 @@ module.exports = {
     },
 
     checkoutPage: async (req, res) => {
-        const userEmail = req.session.customer;
-        const user = await Users.findOne({ Email: userEmail });
-        const userId = user._id;
-        const userAddress = await addresses.findOne({ userId: userId }).lean();
-        if (userAddress) {
-            const address = userAddress.addresses;
-            res.render('user/checkout', { total: totalPrice, userAddresses: address, status: true });
-        } else {
-            res.render('user/checkout', { total: totalPrice, status: false });
+        try {
+            const userEmail = req.session.customer;
+            const user = await Users.findOne({ Email: userEmail });
+            const userId = user._id;
+            const userAddress = await addresses.findOne({ userId: userId }).lean();
+            if (userAddress) {
+                const address = userAddress.addresses;
+                res.render('user/checkout', { total: totalPrice, userAddresses: address, status: true });
+            } else {
+                res.render('user/checkout', { total: totalPrice, status: false });
+            }
+        } catch (error) {
+            console.log(error.message);
         }
     },
 
@@ -360,98 +365,143 @@ module.exports = {
     },
 
     placeOrder: async (req, res) => {
-        try {
-            let addressId;
-            const { status, paymentMethod, address } = req.body;
-            const userEmail = req.session.customer;
-            const user = await Users.findOne({ Email: userEmail });
-            const userId = user._id;
-            const orderItems = (await carts.findOne({ userId: userId })).cartItems;
-            const order = await orders.findOne({ userId });
-            const adr = await addresses.findOne({ userId: userId });
-            if (status == 'first') {
-                const { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN } = req.body;
-                if (adr) {
-                    await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
-                    addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
-                    addressId = mongoose.Types.ObjectId(addressId);
-                } else {
-                    const address = new addresses({
-                        userId: userId,
-                        addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN }
-                    });
-                    await address.save();
-                    addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
-                    addressId = mongoose.Types.ObjectId(addressId);
-                }
-
-                if (paymentMethod == 'Cash on Delivery') {
-                    if (order) {
-                        const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
-                        await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
-                        await carts.deleteOne({ userId });
-                    } else {
-                        const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
-                        const order = new orders({
-                            userId,
-                            orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
-                        });
-                        await order.save();
-                        await carts.deleteOne({ userId });
-                    }
-                    res.json({ status: true });
-                } else {
-                    let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
-                    let total = order.orderDetails[0].totalPrice;
-
-                    let options = {
-                        amount: total * 100,
-                        currency: 'INR',
-                        receipt: '' + order.orderDetails[0]._id
-                    }
-                    razorpayInstance.orders.create(options,
-                        (err, order) => {
-                            if (!err) res.json(order);
-                            else res.send(err);
-                        }
-                    )
-                }
+        let addressId;
+        const { status, paymentMethod, address } = req.body;
+        paymentMethodAnotherFunction = paymentMethod;
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        const orderItems = (await carts.findOne({ userId: userId })).cartItems;
+        const orderInfo = await orders.findOne({ userId });
+        console.log(orderInfo);
+        const adr = await addresses.findOne({ userId: userId });
+        if (status == 'first') {
+            const { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN } = req.body;
+            if (adr) {
+                await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
+                addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
+                addressId = mongoose.Types.ObjectId(addressId);
+                addressFromAnotherFunction = addressId;
             } else {
-                addressId = address;
-                if (paymentMethod == 'Cash on Delivery') {
-                    const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
-                    if (order) {
-                        await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
-                        await carts.deleteOne({ userId });
-                    } else {
-                        const order = new orders({
-                            userId,
-                            orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
-                        });
-                        await order.save();
-                        await carts.deleteOne({ userId });
-                    }
-                    res.json({ status: true });
-                } else {
-                    let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
-                    let total = order.orderDetails[0].totalPrice;
-
-                    let options = {
-                        amount: total * 100,
-                        currency: 'INR',
-                        receipt: '' + order.orderDetails[0]._id
-                    }
-                    razorpayInstance.orders.create(options,
-                        (err, order) => {
-                            if (!err) res.json(order);
-                            else res.send(err);
-                        }
-                    )
-                }
+                const address = new addresses({
+                    userId: userId,
+                    addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN }
+                });
+                await address.save();
+                addressId = ((await addresses.findOne({ userId: userId })).addresses)[0]._id;
+                addressId = mongoose.Types.ObjectId(addressId);
+                addressFromAnotherFunction = addressId;
             }
-        } catch (error) {
-            console.log('Error occured in placeOrder');
-            console.log(error.message);
+
+            if (paymentMethod == 'Cash on Delivery') {
+                if (orderInfo) {
+                    const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                    await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
+                    await carts.deleteOne({ userId });
+                } else {
+                    const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                    const order = new orders({
+                        userId,
+                        orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
+                    });
+                    await order.save();
+                    await carts.deleteOne({ userId });
+                }
+                res.json({ codSuccess: true });
+            } else {
+                console.log('Hey we are here1');
+                const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                if(orderInfo){
+                    await orders.updateOne({userId},{$push:{orderDetails:{ paymentMethod, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }}});
+                }else{
+                    const orderNew = new orders({
+                        userId,
+                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }
+                    });
+                    await orderNew.save();
+                }
+                let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
+                console.log(order);
+                let total = (order.orderDetails[0]).totalPrice;
+                totalFromAnotherFunction = total;
+                let options = {
+                    amount: total * 100,
+                    currency: 'INR',
+                    receipt: '' + order.orderDetails[0]._id
+                }
+
+                razorpayInstance.orders.create(options,
+                    (err, order) => {
+                        if (!err) res.json(order);
+                        else res.send(err);
+                    }
+                );
+            }
+        } else {
+            addressId = address;
+            if (paymentMethod == 'Cash on Delivery') {
+                const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                if (orderInfo) {
+                    await orders.updateOne({ userId: userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice } } });
+                    await carts.deleteOne({ userId });
+                } else {
+                    const order = new orders({
+                        userId,
+                        orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice }
+                    });
+                    await order.save();
+                    await carts.deleteOne({ userId });
+                }
+                res.json({ codSuccess: true });
+            } else {
+                console.log('Hey we are here2');
+                const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
+                if(orderInfo){
+                    await orders.updateOne({userId},{$push:{orderDetails:{ paymentMethod, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }}});
+                }else{
+                    const orderNew = new orders({
+                        userId,
+                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }
+                    });
+                    await orderNew.save();
+                }
+                let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
+                console.log(order);
+                let total = order.orderDetails[0].totalPrice;
+                totalFromAnotherFunction = total;
+                addressFromAnotherFunction = addressId;
+                let options = {
+                    amount: total * 100,
+                    currency: 'INR',
+                    receipt: '' + order.orderDetails[0]._id
+                };
+
+                razorpayInstance.orders.create(options,
+                    (err, order) => {
+                        if (!err) res.json(order);
+                        else res.send(err);
+                    }
+                );
+            }
+        }
+    },
+
+    verifyPayment: async (req, res) => {
+        console.log('Hey inside verifyPayment');
+        const userEmail = req.session.customer;
+        const userId = (await Users.findOne({ Email: userEmail }))._id;
+        let details = req.body;
+        const crypto = require('crypto');
+        let hmac = crypto.createHmac('sha256', 'FTzFyk2RIsK7R92rZ0zkCW7X');
+        hmac.update(details.payment.razorpay_order_id + '|' + details.payment.razorpay_payment_id);
+        hmac = hmac.digest('hex')
+        if (hmac == details.payment.razorpay_signature) {
+            console.log('payment successss');   
+            await orders.updateOne({orderDetails:{$elemMatch:{_id:details.order.receipt}}},{'orderDetails.$.status':'Order placed'});
+            await carts.deleteOne({ userId: userId })
+            res.json({ status: true })
+        } else {
+            res.json({ status: false });
         }
     },
 

@@ -358,6 +358,7 @@
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
+
     <script>
         $('#checkoutForm').submit((e) => {
             e.preventDefault();
@@ -366,8 +367,7 @@
                 method: 'post',
                 data: $('#checkoutForm').serialize(),
                 success: (response) => {
-                    console.log(response.status);
-                    if (response.status) location.href = '/orderConfirmationPage';
+                    if (response.codSuccess) location.href = '/orderConfirmationPage';
                     else {
                         razorPayment(response);
                     }
@@ -376,8 +376,9 @@
         })
 
         function razorPayment(order) {
+            console.log('Helloo at razorPayment');
             let options = {
-                'key': 'rzp_test_byX4xjQdkJOyzX',
+                'key': 'rzp_test_eXHeIXDXI5A5em',
                 'amount': order.amount,
                 'currency': 'INR',
                 'name': 'PHONEMART',
@@ -399,14 +400,15 @@
                     'address': 'Razorpay Corporate Office'
                 },
                 'theme': {
-                    'color': '#F37254'
+                    'color': '#FFD333'
                 }
             }
-            let rzp1 = new Razorpay(options)
+            let rzp1 = new Razorpay(options);
             rzp1.open();
         }
 
         function verifyPayment(payment, order) {
+            console.log('Hey inside verifyPayment');
             $.ajax({
                 url: '/verifyPayment',
                 data: {
@@ -417,9 +419,9 @@
                 success: (response) => {
                     console.log('sett');
                     if (response.status) {
-                        location.href = '/confirmation'
+                        location.href = '/orderConfirmationPage';
                     } else {
-                        alert('Payment failed')
+                        alert('Payment failed');
                     }
                 }
             })

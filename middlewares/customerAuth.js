@@ -7,7 +7,7 @@ const users = require('../models/userModel');
 //     return blockStatus;
 // }
 
-const auth = (req, res, next) => {
+const customerAuth = (req, res, next) => {
     if (!req.session.customer) {
         let err = new Error("You are not authenticated");
         res.setHeader("WWW-Authenticate", "Basic");
@@ -19,4 +19,4 @@ const auth = (req, res, next) => {
     }
 };
 
-module.exports = auth;
+module.exports = customerAuth;

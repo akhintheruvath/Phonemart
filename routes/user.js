@@ -24,6 +24,7 @@ router.post('/proceedtoCheckout',userController.proceedtoCheckout);
 router.get('/checkout',userController.checkoutPage);
 router.post('/newAddress',userController.newAddress);
 router.post('/placeOrder',userController.placeOrder);
+router.post('/verifyPayment',userController.verifyPayment);
 router.get('/orderConfirmationPage',userController.orderConfirmationPage);
 router.get('/orders',userController.orderPage);
 router.get('/viewProducts/:id',userController.viewProducts);

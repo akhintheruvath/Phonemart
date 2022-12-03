@@ -1,4 +1,4 @@
-const auth = (req, res, next) => {
+const adminAuth = (req, res, next) => {
     if (!req.session.adminSession) {
         let err = new Error("You are not authenticated");
         res.setHeader("WWW-Authenticate", "Basic");
@@ -10,4 +10,4 @@ const auth = (req, res, next) => {
     }
 };
 
-module.exports = auth;
+module.exports = adminAuth;

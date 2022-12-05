@@ -16,7 +16,7 @@ router.get('/cart',userController.cartPage);
 router.post('/addToCart',userController.addToCart);
 router.get('/wishlist',userController.wishlistPage);
 router.post('/addToWishlist',userController.addToWishlist);
-router.use(auth);
+// router.use(auth);
 router.post('/changeQuantity',userController.changeQuantity);
 router.post('/removeFromCart',userController.removeFromCart);
 router.post('/applyCoupon',userController.applyCoupon);

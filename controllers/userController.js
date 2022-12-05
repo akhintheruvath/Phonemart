@@ -6,6 +6,7 @@ const carts = require('../models/cartModel');
 const wishlists = require('../models/wishlistModel');
 const coupons = require('../models/couponModel');
 const orders = require('../models/orderModel');
+const banners = require('../models/bannerModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
@@ -38,13 +39,13 @@ const razorpayInstance = new Razorpay({
 
 module.exports = {
     homeGet: async (req, res) => {
+        let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
+        let categoryDetails = await categories.find({}).lean();
+        let bannerDetails = await banners.find({}).lean();
         if (req.session.customer) {
-            let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
-            res.render('user/userHome', { signedin: true, products: productDetails, productDetails });
+            res.render('user/userHome', { signedin: true, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
         } else {
-            let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
-            let categoryDetails = await categories.find({}).lean();
-            res.render('user/userHome', { signedin: false, products: productDetails, categories: categoryDetails, productDetails });
+            res.render('user/userHome', { signedin: false, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
         }
     },
 
@@ -373,7 +374,6 @@ module.exports = {
         const userId = user._id;
         const orderItems = (await carts.findOne({ userId: userId })).cartItems;
         const orderInfo = await orders.findOne({ userId });
-        console.log(orderInfo);
         const adr = await addresses.findOne({ userId: userId });
         if (status == 'first') {
             const { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN } = req.body;
@@ -409,19 +409,17 @@ module.exports = {
                 }
                 res.json({ codSuccess: true });
             } else {
-                console.log('Hey we are here1');
                 const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
-                if(orderInfo){
-                    await orders.updateOne({userId},{$push:{orderDetails:{ paymentMethod, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }}});
-                }else{
+                if (orderInfo) {
+                    await orders.updateOne({ userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice, status: 'Payment failed' } } });
+                } else {
                     const orderNew = new orders({
                         userId,
-                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }
+                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice, status: 'Payment failed' }
                     });
                     await orderNew.save();
                 }
                 let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
-                console.log(order);
                 let total = (order.orderDetails[0]).totalPrice;
                 totalFromAnotherFunction = total;
                 let options = {
@@ -454,19 +452,17 @@ module.exports = {
                 }
                 res.json({ codSuccess: true });
             } else {
-                console.log('Hey we are here2');
                 const shippingAddress = ((await addresses.findOne({ userId }, { addresses: { $elemMatch: { _id: addressId } } })).addresses)[0];
-                if(orderInfo){
-                    await orders.updateOne({userId},{$push:{orderDetails:{ paymentMethod, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }}});
-                }else{
+                if (orderInfo) {
+                    await orders.updateOne({ userId }, { $push: { orderDetails: { paymentMethod, address: shippingAddress, orderItems, totalPrice, status: 'Payment failed' } } });
+                } else {
                     const orderNew = new orders({
                         userId,
-                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice,status:'Payment failed' }
+                        orderDetails: { paymentMethod: paymentMethodAnotherFunction, address: shippingAddress, orderItems, totalPrice, status: 'Payment failed' }
                     });
                     await orderNew.save();
                 }
                 let order = await orders.findOne({ userId: userId }, { orderDetails: { $slice: -1 } });
-                console.log(order);
                 let total = order.orderDetails[0].totalPrice;
                 totalFromAnotherFunction = total;
                 addressFromAnotherFunction = addressId;
@@ -479,7 +475,9 @@ module.exports = {
                 razorpayInstance.orders.create(options,
                     (err, order) => {
                         if (!err) res.json(order);
-                        else res.send(err);
+                        else {
+                            res.send(err);
+                        }
                     }
                 );
             }
@@ -487,7 +485,6 @@ module.exports = {
     },
 
     verifyPayment: async (req, res) => {
-        console.log('Hey inside verifyPayment');
         const userEmail = req.session.customer;
         const userId = (await Users.findOne({ Email: userEmail }))._id;
         let details = req.body;
@@ -496,8 +493,7 @@ module.exports = {
         hmac.update(details.payment.razorpay_order_id + '|' + details.payment.razorpay_payment_id);
         hmac = hmac.digest('hex')
         if (hmac == details.payment.razorpay_signature) {
-            console.log('payment successss');   
-            await orders.updateOne({orderDetails:{$elemMatch:{_id:details.order.receipt}}},{'orderDetails.$.status':'Order placed'});
+            await orders.updateOne({ orderDetails: { $elemMatch: { _id: details.order.receipt } } }, { 'orderDetails.$.status': 'Order placed' });
             await carts.deleteOne({ userId: userId })
             res.json({ status: true })
         } else {
@@ -515,30 +511,39 @@ module.exports = {
     },
 
     orderPage: async (req, res) => {
-        const userEmail = req.session.customer;
-        const userId = (await Users.findOne({ Email: userEmail }))._id;
-        let allOrders = await orders.findOne({ userId }).lean();
-        if (allOrders) {
-            allOrders = allOrders.orderDetails;
-            allOrders.forEach(e => {
-                date = e.createdAt;
-                e.date = date.toDateString();
-            })
-            res.render('user/orderPage', { allOrders });
-        } else {
-            res.render('user/orderPage', { message: 'No orders found... Continue shopping...' });
+        try {
+            const userEmail = req.session.customer;
+            const userId = (await Users.findOne({ Email: userEmail }))._id;
+            let allOrders = await orders.findOne({ userId }).lean();
+            if (allOrders) {
+                allOrders = allOrders.orderDetails;
+                allOrders.forEach(e => {
+                    date = e.createdAt;
+                    e.date = date.toDateString();
+                })
+                res.render('user/orderPage', { allOrders });
+            } else {
+                res.render('user/orderPage', { message: 'No orders found... Continue shopping...' });
+            }
+        } catch (error) {
+            console.log(error.message);
+            res.redirect('/login');
         }
     },
 
     viewProducts: async (req, res) => {
-        let orderId = req.params.id;
-        orderId = mongoose.Types.ObjectId(orderId);
-        const userEmail = req.session.customer;
-        const userId = (await Users.findOne({ Email: userEmail }))._id;
-        const order = await orders.findOne({ userId }, { orderDetails: { $elemMatch: { _id: orderId } } }).populate('orderDetails.orderItems.productId').lean();
-        const orderDetails = order.orderDetails;
-        const orderItems = orderDetails[0].orderItems;
-        res.render('user/viewProducts', { orderItems });
+        try {
+            let orderId = req.params.id;
+            orderId = mongoose.Types.ObjectId(orderId);
+            const userEmail = req.session.customer;
+            const userId = (await Users.findOne({ Email: userEmail }))._id;
+            const order = await orders.findOne({ userId }, { orderDetails: { $elemMatch: { _id: orderId } } }).populate('orderDetails.orderItems.productId').lean();
+            const orderDetails = order.orderDetails;
+            const orderItems = orderDetails[0].orderItems;
+            res.render('user/viewProducts', { orderItems });
+        } catch (error) {
+            res.redirect('/login');
+        }
     },
 
     userLogout: (req, res) => {

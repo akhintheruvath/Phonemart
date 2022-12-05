@@ -1,0 +1,36 @@
+<table class="table table-striped table-dark">
+    <thead>
+        <tr>
+            <th scope="col" class="py-4">OrderId</th>
+            <th scope="col" class="py-4">Order Date</th>
+            <th scope="col" class="py-4">Shipping Address</th>
+            <th scope="col" class="py-4">Amount</th>
+            <th scope="col" class="py-4">Payment Method</th>
+            <th scope="col" class="py-4">Order Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each allOrders}}
+            {{#each this.orderDetails}}
+                <tr>
+                    <th scope="row"><a href="/admin/orderedProductDetails/{{this._id}}">{{this._id}}</a></th>
+                    <td>{{this.createdAt}}</td>
+                    <td>{{this.address.Name}}, {{this.address.Mobile}}, {{this.address.HouseName}}, {{this.address.PostOffice}}, {{this.address.City}}, {{this.address.District}}, {{this.address.State}}, {{this.address.PIN}}</td>
+                    <td>{{this.totalPrice}}</td>
+                    <td>{{this.paymentMethod}}</td>
+                    <td>
+                        <select>
+                            <option>{{this.status}}</option>
+                            <button><option>Payment failed</option></button>
+                            <option>Order placed</option>
+                            <option>Product(s) packed</option>
+                            <option>Shipped</option>
+                            <option>Delivered</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </td>
+                </tr>
+            {{/each}}
+        {{/each}}
+    </tbody>
+</table>

@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-center">
             <h2 class="pb-2">Edit Product</h2>
         </div>
-        <form action="/admin/productEdit/{{datas._id}}" method="post">
+        <form action="/admin/productEdit/{{datas._id}}" method="post" enctype="multipart/form-data">
 
             <!-- Name field -->
             <div class="form-outline mb-2">
@@ -91,7 +91,7 @@
 
             <div class="form-outline mb-2">
                 <label for="Image">Change image</label>
-                <input type="file" name="Image" id="image" class="form-control">
+                <input type="file" accept="image/png, image/jpeg" name="image" id="image">
             </div>
 
             <!-- Submit button -->

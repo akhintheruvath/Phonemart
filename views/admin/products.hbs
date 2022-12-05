@@ -57,7 +57,7 @@
                         <input class="mb-2 p-2 pr-5" type="text" placeholder="Enter the processor name" name="processor"
                             required>
                         <br><label>Choose product images</label>
-                        <input type="file" accept="image/png, image/jpeg" name="image" id="image">
+                        <input type="file" accept="image/png, image/jpeg" name="image" id="image" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -71,13 +71,25 @@
     <table class="table table-striped table-dark">
         <thead>
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Image</th>
-                <th scope="col">Category</th>
-                <th scope="col">Price</th>
-                <th scope="col">Edit</th>
-                <th scope="col">Disable/Enable</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        Add Product
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col" class="py-4">#</th>
+                <th scope="col" class="py-4">Name</th>
+                <th scope="col" class="py-4">Image</th>
+                <th scope="col" class="py-4">Category</th>
+                <th scope="col" class="py-4">Price</th>
+                <th scope="col" class="py-4">Edit</th>
+                <th scope="col" class="py-4">Disable/Enable</th>
             </tr>
         </thead>
         <tbody>
@@ -115,18 +127,6 @@
                 </td>
             </tr>
             {{/each}}
-            <tr>
-                <td></td>
-                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                        Add Product
-                    </button>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
         </tbody>
     </table>
 </section>

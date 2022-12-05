@@ -9,7 +9,7 @@ module.exports = {
     productsGet: async (req, res) => {
         productDetails = await products.find({}).lean();
         categoryDetails = await categories.find({}).lean();
-        res.render('admin/products', { data: productDetails, categoryData: categoryDetails,admin:true });
+        res.render('admin/products', { data: productDetails, categoryData: categoryDetails, admin: true });
     },
 
     addProductPost: async (req, res) => {
@@ -39,7 +39,6 @@ module.exports = {
             productDetails = await products.find({}).lean();
             res.redirect('/admin/products');
         } catch (error) {
-            // res.send(error.message);
             console.log(error.message);
             res.redirect('/admin/products');
         }
@@ -59,10 +58,21 @@ module.exports = {
     productEditPost: async (req, res) => {
         try {
             const { id } = req.params;
+            let imageEdit;
+            if (req.file === undefined) imageEdit = false;
+            else imageEdit = true;
+            if (imageEdit) {
+                let locaFilePath = req.file.path;
+                let result = await uploadToCloudinary(locaFilePath);
+                await products.updateOne({ _id: id }, {
+                    $set: {
+                        Image: req.file.filename,
+                        imageurl: result.url
+                    }
+                });
+            }
             const editedData = req.body;
-            // const editedImage = req.file.path;
             await products.findByIdAndUpdate(id, { $set: editedData });
-            // await producs.findByIdAndUpdate(id,{$set: {Image: editedImage}})
             productDetails = await products.find({}).lean();
             res.redirect('/admin/products');
         } catch (error) {
@@ -70,20 +80,20 @@ module.exports = {
         }
     },
 
-    disableProduct: async (req,res) => {
+    disableProduct: async (req, res) => {
         try {
             const { id } = req.params;
-            await products.findByIdAndUpdate(id,{$set:{productDisable:true}});
+            await products.findByIdAndUpdate(id, { $set: { productDisable: true } });
             res.redirect('/admin/products');
         } catch (error) {
             res.send(error.message);
         }
     },
 
-    enableProduct: async (req,res) => {
+    enableProduct: async (req, res) => {
         try {
             const { id } = req.params;
-            await products.findByIdAndUpdate(id,{$set:{productDisable:false}});
+            await products.findByIdAndUpdate(id, { $set: { productDisable: false } });
             res.redirect('/admin/products');
         } catch (error) {
             console.log(error.message);

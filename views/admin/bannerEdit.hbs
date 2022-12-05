@@ -1,0 +1,16 @@
+<div class="row justify-content-center mx-3">
+    <div class="p-3 mt-4 col-sm-6 col-md-6 col-lg-5 border border-primary" style="border-radius: 0.5rem;">
+        <div class="d-flex justify-content-center">
+            <h2 class="pb-2">Edit banner</h2>
+        </div>
+        <form action="/admin/bannerEdit" method="post" enctype="multipart/form-data">
+            <div class="form-outline mb-2">
+                <label for="Image">Change image</label>
+                <input type="file" accept="image/png, image/jpeg" name="image" id="image" required>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-1 mt-3">Save</button>
+        </form>
+    </div>
+</div>

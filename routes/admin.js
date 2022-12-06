@@ -36,10 +36,9 @@ router.get('/banners',bannerController.bannerGet);
 router.post('/banners',upload.single('image'),bannerController.bannerPost);
 router.get('/bannerEdit/:id',bannerController.bannerEditGet);
 router.post('/bannerEdit',upload.single('image'),bannerController.bannerEditPost);
-
 router.get('/orderManagement',orderController.orderManagementPage);
 router.get('/orderedProductDetails/:id',orderController.orderedProductDetails);
-
+router.post('/changeOrderStatus',orderController.changeOrderStatus);
 router.get('/adminLogout',adminController.adminLogout);
 
 module.exports = router;

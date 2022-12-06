@@ -43,7 +43,9 @@ module.exports = {
         let categoryDetails = await categories.find({}).lean();
         let bannerDetails = await banners.find({}).lean();
         if (req.session.customer) {
-            res.render('user/userHome', { signedin: true, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
+            let userEmail = req.session.customer;
+            let userDetails = await Users.findOne({ Email: userEmail }).lean();
+            res.render('user/userHome', { signedin: true, userDetails, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
         } else {
             res.render('user/userHome', { signedin: false, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
         }
@@ -148,6 +150,34 @@ module.exports = {
             otpmsg = 'Invalid OTP.. Try again';
             res.redirect('/otpPage');
         }
+    },
+
+    userProfile: async (req, res) => {
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        const userDetails = await Users.findOne({ Email: userEmail }).lean();
+        const userAddress = await addresses.findOne({ userId: userId }).lean();
+        if (userAddress) {
+            const address = userAddress.addresses;
+            res.render('user/userProfile', { userDetails, address });
+        } else {
+            res.render('user/userProfile', { userDetails });
+        }
+    },
+
+    editName: async (req,res) => {
+        await Users.updateOne({_id:req.body.userId},{ Name:req.body.Name});
+        res.json({status:true});
+    },
+
+    deleteAddress: async (req, res) => {
+        const userEmail = req.session.customer;
+        const user = await Users.findOne({ Email: userEmail });
+        const userId = user._id;
+        const addressId = req.params.id;
+        await addresses.updateOne({ userId: userId }, { $pull: { addresses: { _id: addressId } } });
+        res.redirect('/profile');
     },
 
     shopGet: async (req, res) => {
@@ -358,8 +388,21 @@ module.exports = {
             const userEmail = req.session.customer;
             const user = await Users.findOne({ Email: userEmail });
             const userId = user._id;
-            await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
-            res.redirect('/checkout');
+            const adr = await addresses.findOne({ userId: userId });
+            if (adr) {
+                await addresses.updateOne({ userId: userId }, { $push: { addresses: { Name, Email, HouseName, Mobile, PostOffice, City, District, State, PIN } } });
+            } else {
+                const address = new addresses({
+                    userId: userId,
+                    addresses: { Name, Email, Mobile, HouseName, PostOffice, City, District, State, PIN }
+                });
+                await address.save();
+            }
+            if (req.body.page == 'checkout') {
+                res.redirect('/checkout');
+            } else {
+                res.redirect('/profile');
+            }
         } catch (error) {
             console.log(error.message);
         }

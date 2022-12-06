@@ -1,13 +1,33 @@
 const session = require('express-session');
 const Admin = require('../models/adminModel');
+const users = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
 let msg = '';
 
 module.exports = {
-    loginGet : (req,res) => {
+    loginGet : async (req,res) => {
         if(req.session.adminSession){
-            res.render('admin/adminHome',{admin:true});
+            let userCount = await users.countDocuments();
+
+            const allOrders = await orders.aggregate([
+                {
+                    $project: {
+                        orderDetails: {
+                            $filter: {
+                                input: '$orderDetails',
+                                as: 'orderDetails',
+                                cond: {}
+                            },
+                        },
+                        _id: 0,
+                    },
+                },
+            ]);
+
+            console.log(allOrders);
+
+            res.render('admin/adminHome',{admin:true,userCount});
         }else{
             res.render('admin/adminLogin',{message:msg});
             msg = '';

@@ -1,3 +1,18 @@
+<p class="ml-2">Change OrderStatus</p>
+<form action="" id="changeOrderStatus">
+    <select class="py-2 mb-2 ml-2" name="orderStatus">
+        <option value="{{data.status}}">{{data.status}}</option>
+        <option value="Payment failed">Payment failed</option>
+        <option value="Order placed">Order placed</option>
+        <option value="Packed">Packed</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+    </select>
+    <input type="text" value="{{data._id}}" name="orderId" hidden>
+    <button class="btn btn-success" type="submit">Save</button>
+</form>
+
 <table class="table table-striped table-dark">
     <thead>
         <tr>
@@ -9,12 +24,12 @@
     </thead>
     <tbody>
         {{#each productDetails}}
-            <tr>
-                <th scope="row">{{inc @index}}</th>
-                <td>{{this.productId.Name}}</td>
-                <td><img src="{{this.productId.imageurl}}" width="40"></td>
-                <td>{{this.quantity}}</td>
-            </tr>
+        <tr>
+            <th scope="row">{{inc @index}}</th>
+            <td>{{this.productId.Name}}</td>
+            <td><img src="{{this.productId.imageurl}}" width="40"></td>
+            <td>{{this.quantity}}</td>
+        </tr>
         {{/each}}
     </tbody>
 </table>

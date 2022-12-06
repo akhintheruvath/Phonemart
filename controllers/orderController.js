@@ -20,9 +20,18 @@ module.exports = {
     orderedProductDetails: async (req,res) => {
         const orderId = req.params.id;
         let productDetails = (await orders.findOne({'orderDetails._id':orderId},{orderDetails:{$elemMatch:{_id:orderId}}}).populate('orderDetails.orderItems.productId').lean()).orderDetails[0];
-        console.log(productDetails);
+        let data = productDetails;
         productDetails = productDetails.orderItems;
-        console.log(productDetails);
-        res.render('admin/orderedProducts',{ admin:true,productDetails });
+        res.render('admin/orderedProducts',{ admin:true,productDetails,data });
+    },
+
+    changeOrderStatus:async(req,res) => {
+        let status = req.body.orderStatus;
+        let orderId = req.body.orderId;
+        try {
+            await orders.updateOne({orderDetails:{$elemMatch:{_id:orderId}}},{'orderDetails.$.status':status})
+        } catch (error) {
+            console.log(error.message);
+        }
     }
 }

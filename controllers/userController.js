@@ -41,7 +41,6 @@ module.exports = {
     homeGet: async (req, res) => {
         let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
         let productCount = productDetails.length;
-        console.log(productCount);
         let latestProducts;
         if(productCount>=4){
             latestProducts = productDetails.slice(-4);

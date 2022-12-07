@@ -40,9 +40,7 @@ module.exports = {
     disableOrEnable: async (req,res) => {
         const { couponId } = req.body;
         const coupon = await coupons.findById(couponId);
-        console.log(coupon);
         const couponStatus = coupon.Disable;
-        console.log(couponStatus);
         if(couponStatus){
             await coupons.findByIdAndUpdate(couponId,{$set:{Disable:false}}).then(response => {
                 res.json({ status:false });

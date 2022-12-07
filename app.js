@@ -26,13 +26,19 @@ app.set('view engine','hbs');
 app.set('views',path.join(__dirname,'views'));
 app.engine('hbs',hbs.engine({extname:'hbs',defaultLayout:'layout',layoutDir:'./views/layouts/',partialsDir:'./views/partials'}));
 
-Handlebars.registerHelper("inc", function(value, options)
+Handlebars.registerHelper("inc", function(value)
 {
     return parseInt(value) + 1;
 });
 
 Handlebars.registerHelper("multiply",function(value1,value2){
     return value1 * value2;
+});
+
+Handlebars.registerHelper('times', function(n, block) {
+    let accum = '';
+    for(let i = 1; i <= n; ++i) accum += block.fn(i);
+    return accum;
 });
 
 app.use(

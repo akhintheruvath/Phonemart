@@ -7,9 +7,13 @@ let categoryDetails;
 
 module.exports = {
     productsGet: async (req, res) => {
-        productDetails = await products.find({}).lean();
-        categoryDetails = await categories.find({}).lean();
-        res.render('admin/products', { data: productDetails, categoryData: categoryDetails, admin: true });
+        let pageNumber = req.query.page;
+        let productCount = await products.countDocuments();
+        let perPage = 4;
+        let pageCount = Math.ceil(productCount/perPage);
+        let productDetails = await products.find().skip((pageNumber-1)*perPage).limit(perPage).lean();
+        let categoryDetails = await categories.find().lean();
+        res.render('admin/products', { data: productDetails, categoryData: categoryDetails, pageCount, admin: true });
     },
 
     addProductPost: async (req, res) => {

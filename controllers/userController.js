@@ -40,14 +40,23 @@ const razorpayInstance = new Razorpay({
 module.exports = {
     homeGet: async (req, res) => {
         let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
+        let productCount = productDetails.length;
+        console.log(productCount);
+        let latestProducts;
+        if(productCount>=4){
+            latestProducts = productDetails.slice(-4);
+            productDetails = productDetails.slice(0,8);
+        }else{
+            latestProducts = productDetails;
+        }
         let categoryDetails = await categories.find({}).lean();
         let bannerDetails = await banners.find({}).lean();
         if (req.session.customer) {
             let userEmail = req.session.customer;
             let userDetails = await Users.findOne({ Email: userEmail }).lean();
-            res.render('user/userHome', { signedin: true, userDetails, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
+            res.render('user/userHome', { signedin: true, userDetails, products: productDetails, latestProducts, categories: categoryDetails, productDetails, bannerDetails });
         } else {
-            res.render('user/userHome', { signedin: false, products: productDetails, categories: categoryDetails, productDetails, bannerDetails });
+            res.render('user/userHome', { signedin: false, products: productDetails, latestProducts, categories: categoryDetails, productDetails, bannerDetails });
         }
     },
 
@@ -166,9 +175,9 @@ module.exports = {
         }
     },
 
-    editName: async (req,res) => {
-        await Users.updateOne({_id:req.body.userId},{ Name:req.body.Name});
-        res.json({status:true});
+    editName: async (req, res) => {
+        await Users.updateOne({ _id: req.body.userId }, { Name: req.body.Name });
+        res.json({ status: true });
     },
 
     deleteAddress: async (req, res) => {
@@ -181,6 +190,7 @@ module.exports = {
     },
 
     shopGet: async (req, res) => {
+        let totalDocumentCount = await products.find()
         let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
         res.render('user/shop', { products: productDetails });
     },
@@ -213,37 +223,41 @@ module.exports = {
     },
 
     addToWishlist: async (req, res) => {
-        if (req.session.customer) {
-            const userEmail = req.session.customer;
-            const user = await Users.findOne({ Email: userEmail });
-            let userId = user._id;
-            const userWishList = await wishlists.findOne({ userId: userId });
-            const { productId } = req.body;
-            const product_id = mongoose.Types.ObjectId(productId);
-            if (userWishList) {
-                const products = userWishList.productId;
-                const existStatus = await products.includes(product_id, 0);
-                const user_id = mongoose.Types.ObjectId(userId).toString();
-                if (!existStatus) {
-                    await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
+        try {
+            if (req.session.customer) {
+                const userEmail = req.session.customer;
+                const user = await Users.findOne({ Email: userEmail });
+                let userId = user._id;
+                const userWishList = await wishlists.findOne({ userId: userId });
+                const { productId } = req.body;
+                const product_id = mongoose.Types.ObjectId(productId);
+                if (userWishList) {
+                    const products = userWishList.productId;
+                    const existStatus = await products.includes(product_id, 0);
+                    const user_id = mongoose.Types.ObjectId(userId).toString();
+                    if (!existStatus) {
+                        await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
+                    } else {
+                        await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
+                            res.json(response);
+                        })
+                    }
                 } else {
-                    await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
-                        res.json(response);
-                    })
+                    try {
+                        const wishlist = new wishlists({
+                            userId: userId,
+                            productId: product_id
+                        })
+                        await wishlist.save();
+                    } catch (error) {
+                        console.log(error.message);
+                    }
                 }
             } else {
-                try {
-                    const wishlist = new wishlists({
-                        userId: userId,
-                        productId: product_id
-                    })
-                    await wishlist.save();
-                } catch (error) {
-                    console.log(error.message);
-                }
+                res.redirect('/login');
             }
-        } else {
-            res.redirect('/login');
+        } catch (error) {
+            console.log(error.message);
         }
     },
 

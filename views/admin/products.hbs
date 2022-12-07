@@ -18,13 +18,13 @@
                             style="display: block; padding-right: 138px" required>
                             <option value="categ">Select category</option>
                             {{#each categoryData}}
-                                <option value="{{this.category}}">{{this.category}}</option>
+                            <option value="{{this.category}}">{{this.category}}</option>
                             {{/each}}
                         </select>
-                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter original price" name="originalPrice"
-                            required>
-                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter selling price" name="Price"
-                            required>
+                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter original price"
+                            name="originalPrice" required>
+                        <input class="mb-2 p-2 pr-5" type="number" min="0" placeholder="Enter selling price"
+                            name="Price" required>
                         <select id="ram" class="mb-2 py-2" name="RAM" style="display: block; padding-right: 165px"
                             required>
                             <option value="ram">Select RAM</option>
@@ -97,7 +97,7 @@
             <tr>
                 <th scope="row">{{inc @index}}</th>
                 <td>{{this.Name}}</td>
-                <td><img src="{{this.imageurl}}" width="40"></td>
+                <td><img src="{{this.imageurl}}" width="45"></td>
                 <td>{{this.Category}}</td>
                 <td>₹{{this.Price}}</td>
                 <td><a href="/admin/productEdit/{{this._id}}">
@@ -108,25 +108,33 @@
                 </td>
                 <td>
                     {{#if this.productDisable}}
-                        <a href="/admin/productEnable/{{this._id}}">
-                            <button class="btn btn-primary bg-success"
-                                onclick="return confirm('Are you sure, do you want to enable?')" type="submit"
-                                name="Enable">
-                                Enable
-                            </button>
-                        </a>
+                    <a href="/admin/productEnable/{{this._id}}">
+                        <button class="btn btn-primary bg-success"
+                            onclick="return confirm('Are you sure, do you want to enable?')" type="submit"
+                            name="Enable">
+                            Enable
+                        </button>
+                    </a>
                     {{else}}
-                        <a href="/admin/productDisable/{{this._id}}">
-                            <button class="btn btn-primary bg-danger"
-                                onclick="return confirm('Are you sure, do you want to disable?')" type="submit"
-                                name="Disable">
-                                Disable
-                            </button>
-                        </a>
+                    <a href="/admin/productDisable/{{this._id}}">
+                        <button class="btn btn-primary bg-danger"
+                            onclick="return confirm('Are you sure, do you want to disable?')" type="submit"
+                            name="Disable">
+                            Disable
+                        </button>
+                    </a>
                     {{/if}}
                 </td>
             </tr>
             {{/each}}
         </tbody>
     </table>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item mt-1 mr-2 pt-1">Pages</span></li>
+            {{#times pageCount}}
+                <li class="page-item"><a class="page-link" href="/admin/products/?page={{this}}">{{this}}</a></li>
+            {{/times}}
+        </ul>
+    </nav>
 </section>

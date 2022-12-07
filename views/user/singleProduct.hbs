@@ -37,16 +37,6 @@
                 </a>
             </div>
             <div class="col-lg-4 col-6 text-left">
-                <form action="">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products">
-                        <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
-                        </div>
-                    </div>
-                </form>
             </div>
             <div class="col-lg-4 col-6 text-right">
                 <p class="m-0">Customer Service</p>
@@ -76,9 +66,9 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="/" class="nav-item nav-link">Home</a>
                             <a href="/shop" class="nav-item nav-link">Products</a>
-                            {{!-- <a href="detail.html" class="nav-item nav-link">New Arrivals</a>
-                            <a href=""></a>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a> --}}
+                            <a href="/cart" class="nav-item nav-link">Cart</a>
+                            <a href="/wishlist" class="nav-item nav-link">Wishlist</a>
+                            <a href="/orders" class="nav-item nav-link">Orders</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                             <a href="/wishlist" class="btn px-0">
@@ -137,6 +127,7 @@
                     <div class="d-flex align-items-center mb-4 pt-2">
                         <a><button class="btn btn-primary px-3" onclick="addToCart('{{productData._id}}')"><i class="fa fa-shopping-cart mr-1"></i> Add To
                             Cart</button></a>
+                        <a class="btn btn-outline-dark btn-square ml-1"><button style="border: none; background-color: transparent;" onclick="addToWishlist('{{productData._id}}')"><i class="far fa-heart"></i></button></a>
                     </div>
                 </div>
             </div>
@@ -239,6 +230,24 @@
             }).then(() => {
                 console.log('Reached in then of cart fetch');
                 location.href = '/cart';
+            }).catch((error) => {
+                console.log('Error: ',error.message);
+            })
+        }
+
+        function addToWishlist(productId){
+            console.log('Hey there');
+            console.log(productId);
+            fetch('/addToWishlist',{
+                method:'post',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({ productId })
+            }).then(() => {
+                console.log('Reached in then of wishlist fetch');
+                window.location.reload();
+                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
             }).catch((error) => {
                 console.log('Error: ',error.message);
             })

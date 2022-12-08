@@ -188,6 +188,7 @@ module.exports = {
     },
 
     shopGet: async (req, res) => {
+        let sort = {};
         let categoryDetails = await categories.find({}).lean();
         let query = {$and: [{ categoryDisable: false }, { productDisable: false }]};
         if (req.query.searchText) {
@@ -198,7 +199,14 @@ module.exports = {
         if(req.query.category){
             query.Category = req.query.category;
         }
-        let productDetails = await products.find(query).lean();
+        if(req.query.price){
+            if(req.query.price == -1){
+                sort.Price = -1;
+            }else{
+                sort.Price = 1;
+            }
+        }
+        let productDetails = await products.find(query).sort(sort).lean();
         res.render('user/shop', { products: productDetails,categoryDetails });
     },
 

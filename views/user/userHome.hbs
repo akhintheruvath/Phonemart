@@ -24,6 +24,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 
 <body>
@@ -344,6 +345,8 @@
                                         class="fa fa-angle-right mr-2"></i>Wishlist</a>
                                 <a class="text-secondary mb-2" href="/orders"><i
                                         class="fa fa-angle-right mr-2"></i>Orders</a>
+                                <a class="text-secondary mb-2" href="/profile"><i
+                                        class="fa fa-angle-right mr-2"></i>Profile</a>
                             </div>
                         </div>
                         <div class="col-md-6 mb-5">
@@ -383,17 +386,11 @@
         <script src="lib/easing/easing.min.js"></script>
         <script src="lib/owlcarousel/owl.carousel.min.js"></script>
 
-        <!-- Contact Javascript File -->
-        <script src="mail/jqBootstrapValidation.min.js"></script>
-        <script src="mail/contact.js"></script>
-
         <!-- Template Javascript -->
         <script src="js/main.js"></script>
 
         <script>
             function addToWishlist(productId) {
-                console.log('Hey there');
-                console.log(productId);
                 fetch('/addToWishlist', {
                     method: 'post',
                     headers: {
@@ -408,8 +405,6 @@
             }
 
             function addToCart(productId) {
-                console.log('Inside addToCart function');
-                console.log(productId);
                 fetch('/addToCart', {
                     method: 'post',
                     headers: {
@@ -417,7 +412,6 @@
                     },
                     body: JSON.stringify({ productId })
                 }).then(() => {
-                    console.log('Reached in then of cart fetch');
                     location.href = '/cart';
                 }).catch((error) => {
                     console.log('Error: ', error.message);

@@ -8,7 +8,6 @@ const hbs = require('express-handlebars');
 const path = require('path');
 const PORT = 3000;
 const fs = require('fs');
-const Razorpay = require('razorpay');
 
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');

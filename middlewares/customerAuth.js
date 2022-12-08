@@ -6,15 +6,14 @@ const customerAuth = async (req, res, next) => {
         res.setHeader("WWW-Authenticate", "Basic");
         err.status = 401;
         res.redirect("/login");
-        next(err);
-    }else{
+    } else {
         const userEmail = req.session.customer;
         console.log();
-        blockStatus = (await users.findOne({Email:userEmail})).Block;
-        if(blockStatus){
+        blockStatus = (await users.findOne({ Email: userEmail })).Block;
+        if (blockStatus) {
             req.session.customer = null;
             return next();
-        }else{
+        } else {
             return next();
         }
     }

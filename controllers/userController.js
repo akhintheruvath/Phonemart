@@ -15,7 +15,6 @@ const addresses = require('../models/addressModel');
 
 let msg = '';
 let msg2 = '';
-let customerId;
 let otpmsg = '';
 let userName, Email, Password;
 let totalPrice;
@@ -42,10 +41,10 @@ module.exports = {
         let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
         let productCount = productDetails.length;
         let latestProducts;
-        if(productCount>=4){
+        if (productCount >= 4) {
             latestProducts = productDetails.slice(-4);
-            productDetails = productDetails.slice(0,8);
-        }else{
+            productDetails = productDetails.slice(0, 8);
+        } else {
             latestProducts = productDetails;
         }
         let categoryDetails = await categories.find({}).lean();
@@ -189,9 +188,18 @@ module.exports = {
     },
 
     shopGet: async (req, res) => {
-        let totalDocumentCount = await products.find()
-        let productDetails = await products.find({ $and: [{ categoryDisable: false }, { productDisable: false }] }).lean();
-        res.render('user/shop', { products: productDetails });
+        let categoryDetails = await categories.find({}).lean();
+        let query = {$and: [{ categoryDisable: false }, { productDisable: false }]};
+        if (req.query.searchText) {
+            query.$or = [
+                { Name: { $regex: '.*' + req.query.searchText + '.*', $options: 'i' } }
+            ]
+        }
+        if(req.query.category){
+            query.Category = req.query.category;
+        }
+        let productDetails = await products.find(query).lean();
+        res.render('user/shop', { products: productDetails,categoryDetails });
     },
 
     singleProduct: async (req, res) => {

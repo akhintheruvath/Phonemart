@@ -7,7 +7,7 @@ let Block;
 module.exports = {
     customersGet: async (req,res) => {
         customersDetails = await customers.find({}).lean();
-        res.render('admin/customers',{ data:customersDetails,admin: true });
+        res.render('admin/customers',{ data:customersDetails,admin: true,customer:true });
     },
 
     blockCustomer: async (req,res) => {

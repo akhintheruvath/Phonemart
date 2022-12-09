@@ -56,10 +56,10 @@ body {
   border-bottom-left-radius: 30px;
 }
 
-.navigation ul li:hover,
+/* .navigation ul li:hover,
 .navigation ul li.hovered {
   background-color: var(--white);
-}
+} */
 
 .navigation ul li:nth-child(1) {
   margin-bottom: 40px;
@@ -74,9 +74,8 @@ body {
   text-decoration: none;
   color: var(--white);
 }
-.navigation ul li:hover a,
-.navigation ul li.hovered a {
-  color: var(--blue);
+.navigation ul li:hover a {
+  color: var(--green);
 }
 
 .navigation ul li a .icon {
@@ -102,7 +101,7 @@ body {
 }
 
 /* --------- curve outside ---------- */
-.navigation ul li:hover a::before,
+/* .navigation ul li:hover a::before,
 .navigation ul li.hovered a::before {
   content: "";
   position: absolute;
@@ -127,7 +126,7 @@ body {
   border-radius: 20%;
   box-shadow: 35px -35px 0 10px var(--white);
   pointer-events: none;
-}
+} */
 
 /* ===================== Main ===================== */
 .main {

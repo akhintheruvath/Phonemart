@@ -49,7 +49,7 @@ module.exports = {
                     })
                 })
             }
-            res.render('admin/adminHome', { admin: true, userCount, orderCount, productCount, categoryCount, placeOrderCount, failedCount, packedCount, shippedCount, deliveredCount, cancelledCount });
+            res.render('admin/adminHome', { admin: true, dashboard:true, userCount, orderCount, productCount, categoryCount, placeOrderCount, failedCount, packedCount, shippedCount, deliveredCount, cancelledCount });
         } else {
             res.render('admin/adminLogin', { message: msg });
             msg = '';

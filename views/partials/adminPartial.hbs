@@ -13,64 +13,113 @@
 
         <li>
             <a href="/admin">
+                {{#if dashboard}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="home-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Dashboard</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="home-outline"></ion-icon>
                 </span>
                 <span class="title">Dashboard</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/customers">
+                {{#if customer}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="people-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Customers</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="people-outline"></ion-icon>
                 </span>
                 <span class="title">Customers</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/products">
+                {{#if product}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="chatbubble-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Products</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                 </span>
                 <span class="title">Products</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/categories">
+                {{#if category}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="help-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Categories</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="help-outline"></ion-icon>
                 </span>
                 <span class="title">Categories</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/coupons">
+                {{#if coupon}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="settings-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Coupons</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="settings-outline"></ion-icon>
                 </span>
                 <span class="title">Coupons</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/banners">
+                {{#if banner}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="image-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Banner images</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="image-outline"></ion-icon>
                 </span>
                 <span class="title">Banner images</span>
+                {{/if}}
             </a>
         </li>
 
         <li>
             <a href="/admin/orderManagement">
+                {{#if order}}
+                <span class="icon" style="color: yellow;">
+                    <ion-icon name="cart-outline"></ion-icon>
+                </span>
+                <span class="title" style="color: yellow;">Orders</span>
+                {{else}}
                 <span class="icon">
                     <ion-icon name="cart-outline"></ion-icon>
                 </span>
                 <span class="title">Orders</span>
+                {{/if}}
             </a>
         </li>
 

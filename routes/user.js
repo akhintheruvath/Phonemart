@@ -11,7 +11,6 @@ router.post('/signup',userController.signupPost);
 router.get('/otpPage',userController.otpPageGet);
 router.post('/otpPage',userController.otpPost);
 router.get('/shop',userController.shopGet);
-router.post('')
 router.get('/singleProduct/:id',userController.singleProduct);
 router.get('/profile',auth,userController.userProfile);
 router.post('/editName',auth,userController.editName);

@@ -46,7 +46,7 @@
     <!-- Topbar End -->
 
     <div class="container-fluid row justify-content-center">
-        <div class="col-md-4 col-lg-4 border border-primary mt-5" style="border-radius: 0.5rem">
+        <div class="col-md-4 col-lg-4 border border-primary mt-5 ml-4" style="border-radius: 0.5rem">
             <div class="d-flex justify-content-center">
                 <h2 class="py-3">Sign up</h2>
             </div>
@@ -54,26 +54,23 @@
 
                 <!-- Name field -->
                 <div class="form-outline mb-3">
-                    <input type="text" id="form2Example2" name="userName" class="form-control"
-                        placeholder="Enter your name" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example2">Name</label>
-                    --}}
+                    <input type="text" id="nameField" name="userName" class="form-control" placeholder="Enter your name"
+                        onfocusout="validateName()" required />
+                    <p class="ml-1 mt-2 text-danger" id="nameError"></p>
                 </div>
 
                 <!-- Email input -->
                 <div class="form-outline mb-3">
-                    <input type="email" id="form2Example1" class="form-control" name="Email"
-                        placeholder="Enter your email" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2" for="form2Example1">Email
-                        address</label> --}}
+                    <input type="email" id="emailField" class="form-control" name="Email" placeholder="Enter your email"
+                        required />
+                    <p id="emailError"></p>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-outline mb-3">
-                    <input type="password" id="form2Example2" class="form-control mb-3" name="Password"
+                    <input type="password" id="passwordField" class="form-control mb-3" name="Password"
                         placeholder="Enter password" required />
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2"
-                        for="form2Example2">Password</label> --}}
+                    <p id="passwordError"></p>
                 </div>
 
                 <div>
@@ -89,4 +86,16 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function validateName(){
+            let nameError = document.getElementById('nameError');
+            let name = document.getElementById('nameField').value;
+            if(name.length<3){
+                nameError.innerHTML = 'Name must be at least 3 characters';
+            }else{
+                nameError.innerHTML = '';
+            }
+        }
+    </script>
 </body>

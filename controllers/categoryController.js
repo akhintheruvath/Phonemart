@@ -6,7 +6,7 @@ let categoryDetails;
 module.exports = {
     categoryGet: async (req, res) => {
         categoryDetails = await categories.find({}).lean();
-        res.render('admin/categories', { data: categoryDetails, admin: true });
+        res.render('admin/categories', { data: categoryDetails, admin: true,category:true });
     },
 
     disableCategory: async (req, res) => {

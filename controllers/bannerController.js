@@ -7,7 +7,7 @@ let bannerId;
 module.exports = {
     bannerGet: async (req, res) => {
         bannerDetails = await banners.find({}).lean();
-        res.render('admin/bannerManagement', { admin: true, bannerDetails });
+        res.render('admin/bannerManagement', { admin: true, bannerDetails, banner:true });
     },
 
     bannerPost: async (req, res) => {

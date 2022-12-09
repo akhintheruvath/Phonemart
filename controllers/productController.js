@@ -13,7 +13,7 @@ module.exports = {
         let pageCount = Math.ceil(productCount/perPage);
         let productDetails = await products.find().skip((pageNumber-1)*perPage).limit(perPage).lean();
         let categoryDetails = await categories.find().lean();
-        res.render('admin/products', { data: productDetails, categoryData: categoryDetails, pageCount, admin: true });
+        res.render('admin/products', { data: productDetails, categoryData: categoryDetails, pageCount, admin: true,product:true });
     },
 
     addProductPost: async (req, res) => {

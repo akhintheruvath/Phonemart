@@ -14,7 +14,7 @@ module.exports = {
                 _id:0
             }
         }]);
-        res.render('admin/orderManagement',{ admin:true,allOrders });
+        res.render('admin/orderManagement',{ admin:true,allOrders, order:true });
     },
 
     orderedProductDetails: async (req,res) => {

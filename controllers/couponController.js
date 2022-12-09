@@ -3,7 +3,7 @@ const coupons = require('../models/couponModel');
 module.exports = {
     couponPage: async (req,res) => {
         let couponDetails = await coupons.find({}).lean()
-        res.render('admin/couponManagement',{ admin:true,data:couponDetails });
+        res.render('admin/couponManagement',{ admin:true,data:couponDetails, coupon:true });
     },
 
     addCouponPost: async (req,res) => {

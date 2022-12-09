@@ -47,7 +47,7 @@ module.exports = {
         } else {
             latestProducts = productDetails;
         }
-        let categoryDetails = await categories.find({}).lean();
+        let categoryDetails = await categories.find({Disable:false}).lean();
         let bannerDetails = await banners.find({}).lean();
         if (req.session.customer) {
             let userEmail = req.session.customer;
@@ -189,7 +189,7 @@ module.exports = {
 
     shopGet: async (req, res) => {
         let sort = {};
-        let categoryDetails = await categories.find({}).lean();
+        let categoryDetails = await categories.find({Disable:false}).lean();
         let query = {$and: [{ categoryDisable: false }, { productDisable: false }]};
         if (req.query.searchText) {
             query.$or = [
@@ -252,9 +252,10 @@ module.exports = {
                     const user_id = mongoose.Types.ObjectId(userId).toString();
                     if (!existStatus) {
                         await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
+                        res.json({wishlistStatus:true});
                     } else {
                         await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
-                            res.json(response);
+                            res.json({wishlistStatus:false});
                         })
                     }
                 } else {
@@ -264,6 +265,7 @@ module.exports = {
                             productId: product_id
                         })
                         await wishlist.save();
+                        res.json({wishlistStatus:true});
                     } catch (error) {
                         console.log(error.message);
                     }
@@ -326,8 +328,9 @@ module.exports = {
                     const productExist = await carts.findOne({ "cartItems.productId": productId });
                     if (productExist == null) {
                         await carts.updateOne({ userId: userId }, { $push: { cartItems: { productId: productId } } });
+                        res.json({cartState:true});
                     } else {
-                        res.json();
+                        res.json({cartState:false});
                     }
                 } else {
                     const cart = new carts({
@@ -335,6 +338,7 @@ module.exports = {
                         cartItems: { productId: productId },
                     })
                     await cart.save();
+                    res.json({cartState:true});
                 }
             } else {
                 res.redirect('/login');

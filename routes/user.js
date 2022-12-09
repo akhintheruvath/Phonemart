@@ -17,7 +17,7 @@ router.get('/profile',auth,userController.userProfile);
 router.post('/editName',auth,userController.editName);
 router.get('/deleteAddress/:id',auth,userController.deleteAddress);
 router.get('/cart',auth,userController.cartPage);
-router.post('/addToCart',auth,userController.addToCart);
+router.post('/addToCart',userController.addToCart);
 router.get('/wishlist',auth,userController.wishlistPage);
 router.post('/addToWishlist',auth,userController.addToWishlist);
 router.post('/changeQuantity',auth,userController.changeQuantity);

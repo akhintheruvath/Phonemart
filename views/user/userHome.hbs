@@ -397,9 +397,14 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ productId })
-                }).then(() => {
-                    console.log('Reached in then of wishlist fetch');
+                }).then(res => res.json()).then((response) => {
+                    if (response.wishlistStatus) {
+                        swal("Item added to wishlist");
+                    } else {
+                        swal("Item removed from wishlist");
+                    }
                 }).catch((error) => {
+                    location.href = '/login';
                     console.log('Error: ', error.message);
                 })
             }
@@ -411,11 +416,17 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ productId })
-                }).then(() => {
-                    location.href = '/cart';
-                }).catch((error) => {
-                    console.log('Error: ', error.message);
-                })
+                }).then(res => res.json())
+                    .then((response) => {
+                        if (response.cartState) {
+                            swal("Item added to cart");
+                        } else {
+                            location.href = '/cart';
+                        }
+                    }).catch((error) => {
+                        location.href = '/login';
+                        console.log('Error: ', error.message);
+                    })
             }
         </script>
 </body>

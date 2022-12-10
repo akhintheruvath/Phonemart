@@ -18,9 +18,7 @@ let msg2 = '';
 let otpmsg = '';
 let userName, Email, Password;
 let totalPrice;
-let addressFromAnotherFunction;
 let paymentMethodAnotherFunction;
-let totalFromAnotherFunction;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -47,7 +45,7 @@ module.exports = {
         } else {
             latestProducts = productDetails;
         }
-        let categoryDetails = await categories.find({Disable:false}).lean();
+        let categoryDetails = await categories.find({ Disable: false }).lean();
         let bannerDetails = await banners.find({}).lean();
         if (req.session.customer) {
             let userEmail = req.session.customer;
@@ -92,6 +90,52 @@ module.exports = {
         }
     },
 
+    passwordResetPage: (req, res) => {
+        res.render('user/passwordReset');
+    },
+
+    resetOtpSend: async (req, res) => {
+        const { Email } = req.body;
+        const user = await Users.findOne({ Email });
+        if (user) {
+            let mailDetails = {
+                from: "akhintheruvath2827@gmail.com",
+                to: Email,
+                subject: "PHONEMART REGISTRATION",
+                html: `<p>YOUR OTP FOR RESETTING PASSWORD IN PHONEMART IS ${OTP}</p>`,
+            };
+            mailTransporter.sendMail(mailDetails, function (err, data) {
+                if (err) {
+                    console.log("Error Occurs");
+                } else {
+                    console.log("OTP sent successfully");
+                }
+            });
+            res.json({ status: true });
+        } else {
+            res.json({ status: false });
+        }
+    },
+
+    resetOtpSubmit: (req, res) => {
+        console.log('Hellloooii');
+        const { passOtp } = req.body;
+        if (passOtp == OTP) {
+            res.json({ otp: true });
+        } else {
+            res.json({ otp: false });
+        }
+    },
+
+    newPasswordSave: async (req,res) => {
+        console.log('New password got');
+        console.log(req.body);
+        const userEmail = req.session.customer;
+        let newPassword = await bcrypt.hash(req.body.newPassword, 10);
+        await Users.updateOne({Email:userEmail},{$set:{Password:newPassword}});
+        res.redirect('/login');
+    },
+
     signupGet: (req, res) => {
         res.render('user/userSignup', { message: msg2 });
         msg2 = '';
@@ -107,21 +151,20 @@ module.exports = {
             html: `<p>YOUR OTP FOR REGISTERING IN PHONEMART IS ${OTP}</p>`,
         };
 
-        mailTransporter.sendMail(mailDetails, function (err, data) {
-            if (err) {
-                console.log("Error Occurs");
-            } else {
-                console.log("Email sent successfully");
-            }
-        });
-
         try {
             const userMail = await Users.findOne({ Email: Email });
-            if (req.body.Password.length >= 8 && (!userMail)) {
+            if (!userMail) {
                 Password = await bcrypt.hash(req.body.Password, 10);
+                mailTransporter.sendMail(mailDetails, function (err, data) {
+                    if (err) {
+                        console.log("Error Occurs");
+                    } else {
+                        console.log("Email sent successfully");
+                    }
+                });
                 res.redirect('/otpPage');
             } else {
-                msg2 = 'Password must be at least 8 characters';
+                msg2 = 'Email already exists';
                 res.redirect('/signup');
             }
         } catch (error) {
@@ -189,25 +232,25 @@ module.exports = {
 
     shopGet: async (req, res) => {
         let sort = {};
-        let categoryDetails = await categories.find({Disable:false}).lean();
-        let query = {$and: [{ categoryDisable: false }, { productDisable: false }]};
+        let categoryDetails = await categories.find({ Disable: false }).lean();
+        let query = { $and: [{ categoryDisable: false }, { productDisable: false }] };
         if (req.query.searchText) {
             query.$or = [
                 { Name: { $regex: '.*' + req.query.searchText + '.*', $options: 'i' } }
             ]
         }
-        if(req.query.category){
+        if (req.query.category) {
             query.Category = req.query.category;
         }
-        if(req.query.price){
-            if(req.query.price == -1){
+        if (req.query.price) {
+            if (req.query.price == -1) {
                 sort.Price = -1;
-            }else{
+            } else {
                 sort.Price = 1;
             }
         }
         let productDetails = await products.find(query).sort(sort).lean();
-        res.render('user/shop', { products: productDetails,categoryDetails });
+        res.render('user/shop', { products: productDetails, categoryDetails });
     },
 
     singleProduct: async (req, res) => {
@@ -252,10 +295,10 @@ module.exports = {
                     const user_id = mongoose.Types.ObjectId(userId).toString();
                     if (!existStatus) {
                         await wishlists.updateOne({ userId: user_id }, { $push: { productId: product_id } });
-                        res.json({wishlistStatus:true});
+                        res.json({ wishlistStatus: true });
                     } else {
                         await wishlists.updateOne({ userId: user_id }, { $pull: { productId: product_id } }).then((response) => {
-                            res.json({wishlistStatus:false});
+                            res.json({ wishlistStatus: false });
                         })
                     }
                 } else {
@@ -265,7 +308,7 @@ module.exports = {
                             productId: product_id
                         })
                         await wishlist.save();
-                        res.json({wishlistStatus:true});
+                        res.json({ wishlistStatus: true });
                     } catch (error) {
                         console.log(error.message);
                     }
@@ -328,9 +371,9 @@ module.exports = {
                     const productExist = await carts.findOne({ "cartItems.productId": productId });
                     if (productExist == null) {
                         await carts.updateOne({ userId: userId }, { $push: { cartItems: { productId: productId } } });
-                        res.json({cartState:true});
+                        res.json({ cartState: true });
                     } else {
-                        res.json({cartState:false});
+                        res.json({ cartState: false });
                     }
                 } else {
                     const cart = new carts({
@@ -338,7 +381,7 @@ module.exports = {
                         cartItems: { productId: productId },
                     })
                     await cart.save();
-                    res.json({cartState:true});
+                    res.json({ cartState: true });
                 }
             } else {
                 res.redirect('/login');

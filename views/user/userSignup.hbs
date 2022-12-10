@@ -55,26 +55,26 @@
                 <!-- Name field -->
                 <div class="form-outline mb-3">
                     <input type="text" id="nameField" name="userName" class="form-control" placeholder="Enter your name"
-                        onfocusout="validateName()" required />
+                        onfocusout="validateName()" oninput="validateNameInput()" required />
                     <p class="ml-1 mt-2 text-danger" id="nameError"></p>
                 </div>
 
                 <!-- Email input -->
                 <div class="form-outline mb-3">
                     <input type="email" id="emailField" class="form-control" name="Email" placeholder="Enter your email"
-                        required />
-                    <p id="emailError"></p>
+                        oninput="validateEmailInput()" onfocusout="validateEmail()" required />
+                    <p class="ml-1 mt-2 text-danger" id="emailError"></p>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-outline mb-3">
                     <input type="password" id="passwordField" class="form-control mb-3" name="Password"
-                        placeholder="Enter password" required />
-                    <p id="passwordError"></p>
+                        placeholder="Enter password" onfocusout="validatePassword()" required />
+                    <p class="ml-1 mt-2 text-danger" id="passwordError"></p>
                 </div>
 
-                <div>
-                    <p class="ml-4 pl-5 text-danger">{{message}}</p>
+                <div style="text-align: center;">
+                    <p class="text-danger">{{message}}</p>
                 </div>
 
                 <div class="text-center">
@@ -82,20 +82,10 @@
                 </div>
 
                 <!-- Submit button -->
-                <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+                <button type="submit" class="btn btn-primary btn-block mb-4">Sign
+                    up</button>
             </form>
         </div>
     </div>
-
-    <script>
-        function validateName(){
-            let nameError = document.getElementById('nameError');
-            let name = document.getElementById('nameField').value;
-            if(name.length<3){
-                nameError.innerHTML = 'Name must be at least 3 characters';
-            }else{
-                nameError.innerHTML = '';
-            }
-        }
-    </script>
+    <script src="/js/signupValidation.js"></script>
 </body>

@@ -60,8 +60,6 @@
 
                 <!-- Password input -->
                 <div class="form-outline mb-3">
-                    {{!-- <label class="form-label d-flex justify-content-center pt-2"
-                        for="form2Example2">Password</label> --}}
                     <input type="password" id="form2Example2" class="form-control mb-3" name="Password"
                         placeholder="Enter password" required />
                 </div>
@@ -73,9 +71,13 @@
                 <!-- Submit button -->
                 <button type="submit" class="btn btn-primary btn-block mb-3">Log in</button>
 
+                <div>
+                    <a href="/forgotPassword">Forgot password?</a>
+                </div>
+
                 <!-- Register buttons -->
                 <div class="text-center">
-                    <p>Don't have an account? <a href="/signup">Sign up</a></p>
+                    <p>Don't have an account? <a class="text-success" href="/signup">Sign up</a></p>
                 </div>
             </form>
         </div>

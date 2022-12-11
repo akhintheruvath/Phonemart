@@ -77,11 +77,7 @@ function validatePassword() {
 }
 
 userSignupForm.addEventListener('submit', (e) => {
-    let error = 0;
     if (validateName() || validateEmail() || validatePassword()) {
-        error = 1;;
-    }
-    if(error == 1){
         e.preventDefault();
     }
 })

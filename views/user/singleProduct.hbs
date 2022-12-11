@@ -24,6 +24,8 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 
 <body>
@@ -73,13 +75,9 @@
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                             <a href="/wishlist" class="btn px-0">
                                 <i class="fas fa-heart text-primary"></i>
-                                {{!-- <span class="badge text-secondary border border-secondary rounded-circle"
-                                    style="padding-bottom: 2px;">0</span> --}}
                             </a>
                             <a href="/cart" class="btn px-0 ml-3">
                                 <i class="fas fa-shopping-cart text-primary"></i>
-                                {{!-- <span class="badge text-secondary border border-secondary rounded-circle"
-                                    style="padding-bottom: 2px;">0</span> --}}
                             </a>
                         </div>
                     </div>
@@ -199,60 +197,6 @@
     <script src="js/main.js"></script>
 
     <!-- Cart and Wishlist -->
-    <script>
-        function addToWishlist(productId){
-            console.log('Hey there');
-            console.log(productId);
-            fetch('/addToWishlist',{
-                method:'post',
-                headers:{
-                    'Content-Type': 'application/json'
-                },
-                body:JSON.stringify({ productId })
-            }).then(() => {
-                console.log('Reached in then of wishlist fetch');
-                window.location.reload();
-                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
-            }).catch((error) => {
-                console.log('Error: ',error.message);
-            })
-        }
-
-        function addToCart(productId){
-            console.log('Inside addToCart function');
-            console.log(productId);
-            fetch('/addToCart',{
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId })
-            }).then(() => {
-                console.log('Reached in then of cart fetch');
-                location.href = '/cart';
-            }).catch((error) => {
-                console.log('Error: ',error.message);
-            })
-        }
-
-        function addToWishlist(productId){
-            console.log('Hey there');
-            console.log(productId);
-            fetch('/addToWishlist',{
-                method:'post',
-                headers:{
-                    'Content-Type': 'application/json'
-                },
-                body:JSON.stringify({ productId })
-            }).then(() => {
-                console.log('Reached in then of wishlist fetch');
-                window.location.reload();
-                {{!-- document.getElementById('heart_symbol').style.backgroundColor = 'green'; --}}
-            }).catch((error) => {
-                console.log('Error: ',error.message);
-            })
-        }
-    </script>
+    <script src="/js/cartAndWishlist.js"></script>
 </body>
-
 </html>

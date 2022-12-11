@@ -59,10 +59,8 @@ function resetPasswordPage(){
 }
 
 $('#newPasswordForm').submit((e) => {
-    e.preventDefault();
-    $.ajax({
-        url:'/newPasswordSubmit',
-        method:'post',
-        data: $('#newPasswordForm').serialize(),
-    })
+    if((document.getElementById('newPass').value).length<8){
+        e.preventDefault();
+        document.getElementById('newPassError').innerHTML = 'Password must be at least 8 characters';
+    }
 })

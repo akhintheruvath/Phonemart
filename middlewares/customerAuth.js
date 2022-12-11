@@ -8,7 +8,6 @@ const customerAuth = async (req, res, next) => {
         res.redirect("/login");
     } else {
         const userEmail = req.session.customer;
-        console.log();
         blockStatus = (await users.findOne({ Email: userEmail })).Block;
         if (blockStatus) {
             req.session.customer = null;

@@ -44,7 +44,6 @@ module.exports = {
             const data = await c.save();
             res.redirect('/admin/categories');
         } catch (error) {
-            // res.send(error.message);
             console.log(error.message);
         }
     },

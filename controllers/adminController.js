@@ -1,4 +1,3 @@
-const session = require('express-session');
 const Admin = require('../models/adminModel');
 const users = require('../models/userModel');
 const orders = require('../models/orderModel');
@@ -76,7 +75,6 @@ module.exports = {
                 res.redirect('/admin');
             }
         } catch (err) {
-            // res.send(err.message);
             console.log(err.message);
             msg = 'Invalid username or password';
             res.redirect('/admin');
@@ -89,7 +87,6 @@ module.exports = {
             res.clearCookie('session-1');
             res.redirect('/admin');
         } catch (error) {
-            // res.send(error.message);
             console.log(error.message);
         }
     }

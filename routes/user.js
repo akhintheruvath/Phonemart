@@ -9,7 +9,7 @@ router.post('/login',userController.loginPost);
 router.get('/forgotPassword',userController.passwordResetPage);
 router.post('/resetOtpSend',userController.resetOtpSend);
 router.post('/resetOtpSubmit',userController.resetOtpSubmit);
-router.post('/newPasswordSubmit',userController.newPasswordSave);
+router.post('/submitNewPassword',userController.newPasswordSave);
 router.get('/signup',userController.signupGet);
 router.post('/signup',userController.signupPost);
 router.get('/otpPage',userController.otpPageGet);

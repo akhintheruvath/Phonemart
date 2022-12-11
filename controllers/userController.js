@@ -1,4 +1,4 @@
-const session = require('express-session');
+require('dotenv').config();
 const Users = require('../models/userModel');
 const products = require('../models/productModel');
 const categories = require('../models/categoryModel');
@@ -19,19 +19,20 @@ let otpmsg = '';
 let userName, Email, Password;
 let totalPrice;
 let paymentMethodAnotherFunction;
+let resetEmail;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: "akhintheruvath2827@gmail.com",
-        pass: "mutcxknugedxvkxk",
+        user: process.env.USER,
+        pass: process.env.PASS,
     },
 });
 const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
 
 const razorpayInstance = new Razorpay({
-    key_id: 'rzp_test_eXHeIXDXI5A5em',
-    key_secret: 'FTzFyk2RIsK7R92rZ0zkCW7X'
+    key_id: process.env.KEY_ID,
+    key_secret: process.env.KEY_SECRET
 });
 
 module.exports = {
@@ -95,12 +96,12 @@ module.exports = {
     },
 
     resetOtpSend: async (req, res) => {
-        const { Email } = req.body;
-        const user = await Users.findOne({ Email });
+        resetEmail = req.body.Email;
+        const user = await Users.findOne({ Email:resetEmail });
         if (user) {
             let mailDetails = {
-                from: "akhintheruvath2827@gmail.com",
-                to: Email,
+                from: process.env.USER,
+                to: resetEmail,
                 subject: "PHONEMART REGISTRATION",
                 html: `<p>YOUR OTP FOR RESETTING PASSWORD IN PHONEMART IS ${OTP}</p>`,
             };
@@ -118,7 +119,6 @@ module.exports = {
     },
 
     resetOtpSubmit: (req, res) => {
-        console.log('Hellloooii');
         const { passOtp } = req.body;
         if (passOtp == OTP) {
             res.json({ otp: true });
@@ -128,11 +128,9 @@ module.exports = {
     },
 
     newPasswordSave: async (req,res) => {
-        console.log('New password got');
-        console.log(req.body);
-        const userEmail = req.session.customer;
+        const userEmail = resetEmail;
         let newPassword = await bcrypt.hash(req.body.newPassword, 10);
-        await Users.updateOne({Email:userEmail},{$set:{Password:newPassword}});
+        await Users.updateOne({Email:userEmail},{Password:newPassword});
         res.redirect('/login');
     },
 
@@ -145,7 +143,7 @@ module.exports = {
 
         ({ userName, Email, Password } = req.body);
         let mailDetails = {
-            from: "akhintheruvath2827@gmail.com",
+            from: process.env.USER,
             to: Email,
             subject: "PHONEMART REGISTRATION",
             html: `<p>YOUR OTP FOR REGISTERING IN PHONEMART IS ${OTP}</p>`,
@@ -168,7 +166,6 @@ module.exports = {
                 res.redirect('/signup');
             }
         } catch (error) {
-            // res.status(500).send(error.message);
             res.redirect('/signup');
             console.log(error.message);
         }
@@ -269,8 +266,9 @@ module.exports = {
                 res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
             } else {
                 const productArray = userWishList.productId;
-                if (productArray.length != 0) {
-                    res.render('user/wishlist', { wishlistProducts: productArray });
+                const wishlistLength = productArray.length;
+                if (wishlistLength != 0) {
+                    res.render('user/wishlist', { wishlistProducts: productArray,wishlistLength });
                 } else {
                     res.render('user/wishlist', { message: 'Wishlist is empty... Continue shopping...' });
                 }
@@ -342,9 +340,10 @@ module.exports = {
                     else shippingCost = 50;
                     total = subTotal + shippingCost;
                     const productDetails = userCart.cartItems;
-                    if (productDetails.length != 0) {
-                        res.render('user/cart', { cartProducts: productDetails, subTotal: subTotal, shippingCost: shippingCost, total: total });
-                    } else if (productDetails.length == 0) {
+                    const cartLength = productDetails.length;
+                    if (cartLength != 0) {
+                        res.render('user/cart', { cartProducts: productDetails, cartLength, subTotal: subTotal, shippingCost: shippingCost, total: total });
+                    } else if (cartLength == 0) {
                         shippingCost = 0;
                         total = 0;
                         res.render('user/cart', { message: 'Cart is empty... Continue shopping...', subTotal: subTotal, shippingCost: shippingCost, total: total });
@@ -608,7 +607,7 @@ module.exports = {
         const userId = (await Users.findOne({ Email: userEmail }))._id;
         let details = req.body;
         const crypto = require('crypto');
-        let hmac = crypto.createHmac('sha256', 'FTzFyk2RIsK7R92rZ0zkCW7X');
+        let hmac = crypto.createHmac('sha256', process.env.KEY_SECRET);
         hmac.update(details.payment.razorpay_order_id + '|' + details.payment.razorpay_payment_id);
         hmac = hmac.digest('hex')
         if (hmac == details.payment.razorpay_signature) {
@@ -671,7 +670,6 @@ module.exports = {
             res.clearCookie('session-1');
             res.redirect('/');
         } catch (error) {
-            // res.send(error.message);
             console.log(error.message);
         }
     }

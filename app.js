@@ -63,7 +63,7 @@ app.use(function (req, res, next) {
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
 
-mongoose.connect('mongodb://localhost/phonemart').then(() => {
+mongoose.connect(process.env.MONGODB_CONNECTION).then(() => {
     console.log('Database connected successfully');
     app.listen(PORT, () => {
         console.log('Server started');

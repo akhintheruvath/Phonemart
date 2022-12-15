@@ -20,6 +20,7 @@ let userName, Email, Password;
 let totalPrice;
 let paymentMethodAnotherFunction;
 let resetEmail;
+let OTP;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
@@ -28,7 +29,6 @@ let mailTransporter = nodemailer.createTransport({
         pass: process.env.PASS,
     },
 });
-const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.KEY_ID,
@@ -99,6 +99,8 @@ module.exports = {
         resetEmail = req.body.Email;
         const user = await Users.findOne({ Email:resetEmail });
         if (user) {
+            let OTP1 = `${Math.floor(1000 + Math.random() * 9000)}`;
+            OTP = OTP1;
             let mailDetails = {
                 from: process.env.USER,
                 to: resetEmail,
@@ -142,6 +144,8 @@ module.exports = {
     signupPost: async (req, res) => {
 
         ({ userName, Email, Password } = req.body);
+        let OTP1 = `${Math.floor(1000 + Math.random() * 9000)}`;
+        OTP = OTP1;
         let mailDetails = {
             from: process.env.USER,
             to: Email,

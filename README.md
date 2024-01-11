@@ -1,0 +1,1 @@
+This is an E-commerce web application created using Node JS, Express JS, hbs(view engine), HTML, CSS and Javascript. Here I used an E-commerce template for front-end design and focused more on backend.

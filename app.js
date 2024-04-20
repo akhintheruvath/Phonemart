@@ -8,7 +8,7 @@ const hbs = require('express-handlebars');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
-const PORT = process.env.PORT; 
+const PORT = process.env.PORT || 3000;
 
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');

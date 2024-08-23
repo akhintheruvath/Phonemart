@@ -24,6 +24,8 @@ let OTP;
 
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
+    port: 587, // Port for SMTP with STARTTLS encryption
+    secure: false,
     auth: {
         user: process.env.USER,
         pass: process.env.PASS,
@@ -159,6 +161,7 @@ module.exports = {
                 Password = await bcrypt.hash(req.body.Password, 10);
                 mailTransporter.sendMail(mailDetails, function (err, data) {
                     if (err) {
+                        console.log(err.message);
                         console.log("Error Occurs");
                     } else {
                         console.log("Email sent successfully");
